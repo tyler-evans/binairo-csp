@@ -1,0 +1,8 @@
+# Start of puzzle
+4 4
+___0
+1___
+0110
+0101
+#End of puzzle
+
