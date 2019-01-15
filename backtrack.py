@@ -4,12 +4,16 @@ from DataStructures.Graph import Graph
 from DataStructures.Vertex import Vertex
 
 
-def initialize_graph():
-    graph = Graph()
+def initialize_board():
     board_data = Board.read_board(open(os.getcwd() + '\\binairo-csp\\Data\\simple_example.txt').readlines())
     board = Board(*board_data)
+    return board
 
-    # Add all the vertices to the board given the input board array
+
+def initialize_graph_from_board(board):
+    graph = Graph()
+
+    # Add all the vertices to the CSP graph given the input board array
     for r, row in enumerate(board._to_string_array()):
         for c, col in enumerate(row):
             # Add the vertex with "id" r+c with initial value based on input
@@ -26,9 +30,18 @@ def initialize_graph():
     for v in graph:
             print(v)
 
+    return graph
+
+
+def solve_with_back_tracking_search(graph):
+    print("Solving")
+
+
 
 def main():
-    graph = initialize_graph()
+    board = initialize_board()
+    graph = initialize_graph_from_board(board)
+    solve_with_back_tracking_search(graph)
 
 
 if __name__ == "__main__":

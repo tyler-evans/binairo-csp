@@ -1,5 +1,11 @@
 from DataStructures.Vertex import Vertex
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Class used to model the Constraint Satisfaction Problem (CSP) graph containing vertices representing
+cells of the Binairo board and edges representing the connected vertices to which we must assign values
+such that the constraints of "Binairo" hold and a solution can be achieved which satisfies all constraints.
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 class Graph:
 
