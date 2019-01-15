@@ -1,17 +1,20 @@
 import os
 from Board.Board import Board
 from DataStructures.Graph import Graph
-from DataStructures.Vertex import Vertex
+from DataStructures.Utility import Utility
+
+utility = Utility()
 
 
 def initialize_board():
-    board_data = Board.read_board(open(os.getcwd() + '\\binairo-csp\\Data\\simple_example.txt').readlines())
+    board_data = Board.read_board(open(os.getcwd() + '\\Data\\simple_example.txt').readlines())
     board = Board(*board_data)
     return board
 
 
 def initialize_graph_from_board(board):
     graph = Graph()
+    graph.dimensions = board.n
 
     # Add all the vertices to the CSP graph given the input board array
     for r, row in enumerate(board._to_string_array()):
@@ -30,18 +33,40 @@ def initialize_graph_from_board(board):
     for v in graph:
             print(v)
 
+    for v in graph.unassigned:
+        print(v)
+
     return graph
 
 
-def solve_with_back_tracking_search(graph):
-    print("Solving")
+def solve_back_tracking_random_node(graph):
+    return solve_back_tracking_random_node_recursive(graph)
 
+
+def solve_back_tracking_random_node_recursive(graph):
+    if graph.unassigned is []:
+        graph.result = True
+        return graph
+
+    # Select a random node from the graph's currently unassigned nodes
+    random_node = graph.unassigned[utility.random_number(0, len(graph.unassigned)-1)]
+
+    for value in graph.domain:
+        # Assign the random_node a value in the domain range [0 or 1]
+        random_node.set_value(value)
+
+        # Check all of the constraints ensuring the validity of this value allocation
+        graph.check_equivalent_zeroes_and_ones_constraint(random_node.row, random_node.col)
+        #TODO: This is only one of the constraints, will implement the rest later on
+
+    return graph.result
 
 
 def main():
     board = initialize_board()
     graph = initialize_graph_from_board(board)
-    solve_with_back_tracking_search(graph)
+
+    solved_graph = solve_back_tracking_random_node(graph)
 
 
 if __name__ == "__main__":

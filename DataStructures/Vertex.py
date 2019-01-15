@@ -28,6 +28,9 @@ class Vertex:
     def get_value(self):
         return self.value
 
+    def set_value(self, value):
+        self.value = value
+
     def get_connections(self):
         return self.connected_to
 
