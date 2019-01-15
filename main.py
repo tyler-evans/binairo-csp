@@ -7,6 +7,7 @@ board = Board(*board_data)
 
 print('\nBoard: ')
 print(board)
+assert not board.is_solution_board
 
 
 print('\nAvailable tiles: ', board.available_tiles)
@@ -23,3 +24,5 @@ while True:
         board.set_tile(*move[0], move[1])
     else:
         break
+
+assert board.is_solution_board

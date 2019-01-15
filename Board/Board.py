@@ -26,14 +26,24 @@ class Board:
     def is_valid_move(self, i, j, ones):
         row, col = self._get_row_col(i, j, ones)
         row[j], col[i] = True, True
-        failures = [
-            self._has_unbalance(row),
-            self._has_unbalance(col),
-            self._has_3_adjacent(row),
-            self._has_3_adjacent(col),
-            not self._has_all_unique()
-        ]
-        return not any(failures)
+        return self._check_array(row) and self._check_array(col) and self._has_all_unique()
+
+
+    @property
+    def is_solution_board(self):
+        full_board = len(self.available_tiles) == 0
+
+        valid_rows_ones = np.all([self._check_array(row) for row in self.ones])
+        valid_rows_zeros = np.all([self._check_array(row) for row in self.zeros])
+
+        valid_cols_ones = np.all([self._check_array(row) for row in self.ones.T])
+        valid_cols_zeros = np.all([self._check_array(row) for row in self.zeros.T])
+
+        is_unique = self._has_all_unique()
+
+        conditions = [full_board, valid_rows_ones, valid_rows_zeros, valid_cols_ones, valid_cols_zeros, is_unique]
+        return all(conditions)
+
 
     # returns all empty tiles
     @property
@@ -68,6 +78,9 @@ class Board:
     def _get_row_col(self, i, j, ones):
         mask = self._get_mask(ones).copy()
         return mask[i,:], mask[:,j]
+
+    def _check_array(self, arr):
+        return not self._has_unbalance(arr) and not self._has_3_adjacent(arr)
 
     def _has_unbalance(self, arr_1d):
         return np.sum(arr_1d) > (self.n // 2)
