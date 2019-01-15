@@ -110,16 +110,19 @@ class Board:
             plt.table(cellText=self._to_string_array(), loc='center', cellLoc='center', bbox=[0,0,1,1])
             plt.show()
         except:
-            pass
+            print('Failed to plot board')
 
+    @staticmethod
+    def read_board(lines):
+        header = lines[0]
+        footer = lines[-1]
 
-def read_board(lines):
-    header = lines[0]
-    footer = lines[-1]
+        board_dims = tuple([int(x) for x in lines[1].split()])
 
-    board_dims = tuple([int(x) for x in lines[1].split()])
+        board = np.array([list(x.strip()) for x in lines[2:-2]], dtype=object)
+        assert board_dims == board.shape
 
-    board = np.array([list(x.strip()) for x in lines[2:-2]], dtype=object)
-    assert board_dims == board.shape
+        zeros = board == '0'
+        ones = board == '1'
 
-    return board
+        return zeros, ones
