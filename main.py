@@ -7,15 +7,13 @@ def graph_vertex_test():
     g = Graph()
     for i in range(6):
         g.add_vertex(i)
-    g.add_edge(0,1)
-    g.add_edge(0,5)
-    g.add_edge(1,2)
-    g.add_edge(2,3)
-    g.add_edge(3,4)
-    g.add_edge(3,5)
-    g.add_edge(4,0)
-    g.add_edge(5,4)
-    g.add_edge(5,2)
+    g.add_edge("00","01")
+    g.add_edge("01","01")
+    g.add_edge("20","53")
+    g.add_edge("23","23")
+    g.add_edge("25","01")
+    g.add_edge("00","01")
+    g.add_edge("28","27")
     for v in g:
         for w in v.get_connections():
             print("( %s , %s )" % (v.get_id(), w.get_id()))

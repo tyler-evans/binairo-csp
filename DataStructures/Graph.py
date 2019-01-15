@@ -6,9 +6,10 @@ class Graph:
     def __init__(self):
         self.vertices = {}
 
-    def add_vertex(self, id):
+    def add_vertex(self, row, col, value):
+        id = str(row) + str(col)
         if id not in self.vertices:
-            v = Vertex(id)
+            v = Vertex(row, col, value)
             self.vertices[id] = v
 
     def get_vertex(self, id):
