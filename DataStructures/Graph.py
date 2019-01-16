@@ -28,7 +28,7 @@ class Graph:
     def get_vertex(self, id):
         return self.vertices[id] if id in self.vertices else None
 
-    def add_edge(self,e1,e2):
+    def add_edge(self, e1, e2):
         if e1 not in self.vertices:
             self.add_vertex(e1)
         if e2 not in self.vertices:
@@ -64,11 +64,24 @@ class Graph:
 
         return satisfies_constraint
 
-    def check_max_two_of_the_same_adjacent_values_constraint(self):
-        return
+    # Ensure that no more than two "0's" or "1's" are placed adjacent to one another
+    def check_max_two_of_the_same_adjacent_values_constraint(self, row, col, value):
+        same_adjacent_values = 0
 
+        if row - 1 > 0 and self.vertices[str(row - 1) + str(col)].value == value:
+            same_adjacent_values += 1
+        if row + 1 < self.dimensions and self.vertices[str(row + 1) + str(col)].value == value:
+            same_adjacent_values += 1
+        if col - 1 > 0 and self.vertices[str(row) + str(col - 1)].value == value:
+            same_adjacent_values += 1
+        if col + 1 < self.dimensions and self.vertices[str(row) + str(col + 1)].value == value:
+            same_adjacent_values += 1
+
+        return same_adjacent_values <= 2
+
+    # Ensure that all rows and columns are unique within the CSP graph
     def check_row_and_column_uniqueness_constraint(self):
-        return 
+        return
 
 
 

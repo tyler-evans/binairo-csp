@@ -7,7 +7,7 @@ utility = Utility()
 
 
 def initialize_board():
-    board_data = Board.read_board(open(os.getcwd() + '\\Data\\simple_example.txt').readlines())
+    board_data = Board.read_board(open(os.getcwd() + '\\binairo-csp\\Data\\simple_example.txt').readlines())
     board = Board(*board_data)
     return board
 
@@ -57,9 +57,8 @@ def solve_back_tracking_random_node_recursive(graph):
 
         # Check all of the constraints ensuring the validity of this value allocation
         graph.check_equivalent_zeroes_and_ones_constraint(random_node.row, random_node.col)
-        graph.check_max_two_of_the_same_adjacent_values_constraint()
+        graph.check_max_two_of_the_same_adjacent_values_constraint(random_node.row, random_node.col, value)
         graph.check_row_and_column_uniqueness_constraint()
-
 
     return graph.result
 
