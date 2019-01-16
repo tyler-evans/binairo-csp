@@ -58,6 +58,9 @@ def solve_back_tracking_random_node_recursive(graph):
 
         graph.display_graph()
 
+        if len(graph.unassigned) == 0:
+            print("ASD")
+
         # Check all of the constraints ensuring the validity of this value allocation
         if graph.check_equivalent_zeroes_and_ones_constraint(random_node.row, random_node.col) and \
                 graph.check_max_two_of_the_same_adjacent_values_constraint(random_node.row, random_node.col, value) and \

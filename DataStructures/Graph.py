@@ -110,15 +110,21 @@ class Graph:
                 return satisfies_constraint
 
         # Build a list of all rows and columns
-        rows_and_cols = []
+        rows = []
+        cols = []
 
         for i in range(self.dimensions):
-            rows_and_cols.append([self.vertices[str(i)+str(j)].value for j in range(self.dimensions)])
-            rows_and_cols.append([self.vertices[str(j)+str(i)].value for j in range(self.dimensions)])
+            rows.append([self.vertices[str(i)+str(j)].value for j in range(self.dimensions)])
+            cols.append([self.vertices[str(j)+str(i)].value for j in range(self.dimensions)])
 
         # A non-unique row or column will trigger an early return indicating non-uniqueness
-        for value in rows_and_cols:
-            if "." not in value and rows_and_cols.count(value) > 1:
+        for value in rows:
+            if "." not in value and rows.count(value) > 1:
+                return False
+
+        # A non-unique row or column will trigger an early return indicating non-uniqueness
+        for value in cols:
+            if "." not in value and cols.count(value) > 1:
                 return False
 
         return satisfies_constraint
