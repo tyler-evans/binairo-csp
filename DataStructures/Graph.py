@@ -64,6 +64,13 @@ class Graph:
 
         return satisfies_constraint
 
+    def check_max_two_of_the_same_adjacent_values_constraint(self):
+        return
+
+    def check_row_and_column_uniqueness_constraint(self):
+        return 
+
+
 
 
 

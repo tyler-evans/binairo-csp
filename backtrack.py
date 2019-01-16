@@ -57,7 +57,9 @@ def solve_back_tracking_random_node_recursive(graph):
 
         # Check all of the constraints ensuring the validity of this value allocation
         graph.check_equivalent_zeroes_and_ones_constraint(random_node.row, random_node.col)
-        #TODO: This is only one of the constraints, will implement the rest later on
+        graph.check_max_two_of_the_same_adjacent_values_constraint()
+        graph.check_row_and_column_uniqueness_constraint()
+
 
     return graph.result
 
