@@ -30,12 +30,6 @@ def initialize_graph_from_board(board):
         graph.add_edge(v.id, str(r) + str(c - 1)) if c - 1 >= 0 else None
         graph.add_edge(v.id, str(r) + str(c + 1)) if c + 1 < len(row) else None
 
-    for v in graph:
-            print(v)
-
-    for v in graph.unassigned:
-        print(v)
-
     return graph
 
 
@@ -52,14 +46,11 @@ def solve_back_tracking_random_node_recursive(graph):
     random_node = graph.unassigned[utility.random_number(0, len(graph.unassigned)-1)]
     graph.unassigned.remove(random_node)
 
+    graph.display_graph()
+
     for value in graph.domain:
         # Assign the random_node a value in the domain range [0 or 1]
         random_node.set_value(value)
-
-        graph.display_graph()
-
-        if len(graph.unassigned) == 0:
-            print("ASD")
 
         # Check all of the constraints ensuring the validity of this value allocation
         if graph.check_equivalent_zeroes_and_ones_constraint(random_node.row, random_node.col) and \
