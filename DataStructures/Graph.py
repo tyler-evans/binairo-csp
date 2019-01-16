@@ -11,7 +11,7 @@ class Graph:
 
     def __init__(self):
         self.dimensions = -1
-        self.domain = ["0", "1"]
+        self.domain = ['0', '1']
         self.vertices = {}
         self.unassigned = []
         self.assigned = []
