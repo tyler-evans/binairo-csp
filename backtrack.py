@@ -25,9 +25,9 @@ def initialize_graph_from_board(board):
     # Add all valid corresponding neighbours as edges in the CSP graph
     for v in graph:
         r, c = v.get_row(), v.get_col()
-        graph.add_edge(v.id, str(r - 1) + str(c)) if r - 1 > 0 else None
+        graph.add_edge(v.id, str(r - 1) + str(c)) if r - 1 >= 0 else None
         graph.add_edge(v.id, str(r + 1) + str(c)) if r + 1 < len(row) else None
-        graph.add_edge(v.id, str(r) + str(c - 1)) if c - 1 > 0 else None
+        graph.add_edge(v.id, str(r) + str(c - 1)) if c - 1 >= 0 else None
         graph.add_edge(v.id, str(r) + str(c + 1)) if c + 1 < len(row) else None
 
     for v in graph:
@@ -56,9 +56,9 @@ def solve_back_tracking_random_node_recursive(graph):
         random_node.set_value(value)
 
         # Check all of the constraints ensuring the validity of this value allocation
-        graph.check_equivalent_zeroes_and_ones_constraint(random_node.row, random_node.col)
-        graph.check_max_two_of_the_same_adjacent_values_constraint(random_node.row, random_node.col, value)
-        graph.check_row_and_column_uniqueness_constraint()
+        result = graph.check_equivalent_zeroes_and_ones_constraint(random_node.row, random_node.col)
+        result = graph.check_max_two_of_the_same_adjacent_values_constraint(random_node.row, random_node.col, value)
+        result = graph.check_row_and_column_uniqueness_constraint(random_node.row, random_node.col)
 
     return graph.result
 

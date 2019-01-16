@@ -42,6 +42,14 @@ class Graph:
     def __iter__(self):
         return iter(self.vertices.values())
 
+    def display_graph(self):
+        for i in range(self.dimensions):
+            row = []
+            for j in range(self.dimensions):
+                row.append(self.vertices[str(i) + str(j)].value)
+            print(row)
+        print()
+
     # Ensure that a row and column do not have more than n/2 "0's" or "1's" assigned
     def check_equivalent_zeroes_and_ones_constraint(self, row, col):
         num_ones_row, num_zeroes_row, num_ones_col, num_zeroes_col = 0, 0, 0, 0
@@ -68,11 +76,11 @@ class Graph:
     def check_max_two_of_the_same_adjacent_values_constraint(self, row, col, value):
         same_adjacent_values = 0
 
-        if row - 1 > 0 and self.vertices[str(row - 1) + str(col)].value == value:
+        if row - 1 >= 0 and self.vertices[str(row - 1) + str(col)].value == value:
             same_adjacent_values += 1
         if row + 1 < self.dimensions and self.vertices[str(row + 1) + str(col)].value == value:
             same_adjacent_values += 1
-        if col - 1 > 0 and self.vertices[str(row) + str(col - 1)].value == value:
+        if col - 1 >= 0 and self.vertices[str(row) + str(col - 1)].value == value:
             same_adjacent_values += 1
         if col + 1 < self.dimensions and self.vertices[str(row) + str(col + 1)].value == value:
             same_adjacent_values += 1
@@ -80,8 +88,36 @@ class Graph:
         return same_adjacent_values <= 2
 
     # Ensure that all rows and columns are unique within the CSP graph
-    def check_row_and_column_uniqueness_constraint(self):
-        return
+    def check_row_and_column_uniqueness_constraint(self, row, col):
+        satisfies_constraint = True
+
+        # Ensure that the row and column the node exists in is completely filled with values, otherwise
+        # there is no need to further check this constraint since it is guaranteed to be unique due to unassigned values
+        for i in range(self.dimensions):
+            if self.vertices[str(row) + str(i)].value == "_":
+                return satisfies_constraint
+
+        for i in range(self.dimensions):
+            if self.vertices[str(i) + str(col)].value == "_":
+                return satisfies_constraint
+
+        # Build a list of all rows and columns
+        rows_and_cols = []
+
+        for i in range(self.dimensions):
+            rows_and_cols.append([self.vertices[str(i)+str(j)].value for j in range(self.dimensions)])
+            rows_and_cols.append([self.vertices[str(j)+str(i)].value for j in range(self.dimensions)])
+
+        unique_rows_and_cols = []
+        for value in rows_and_cols:
+            if value not in unique_rows_and_cols:
+                unique_rows_and_cols.append(value)
+
+        # A non-unique row or column will violate this property
+        if len(unique_rows_and_cols) < len(rows_and_cols):
+            satisfies_constraint = False
+
+        return satisfies_constraint
 
 
 
