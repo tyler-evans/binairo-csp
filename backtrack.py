@@ -7,7 +7,7 @@ utility = Utility()
 
 
 def initialize_board():
-    board_data = Board.read_board(open(os.getcwd() + '\\binairo-csp\\Data\\simple_example.txt').readlines())
+    board_data = Board.read_board(open(os.getcwd() + '\\Data\\simple_example.txt').readlines())
     board = Board(*board_data)
     return board
 
