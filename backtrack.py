@@ -44,25 +44,34 @@ def solve_back_tracking_random_node(graph):
 
 
 def solve_back_tracking_random_node_recursive(graph):
-    if graph.unassigned is []:
-        graph.result = True
+    # Base-case to stop recursion where all nodes have been assigned a value [0 or 1]
+    if len(graph.unassigned) == 0:
         return graph
 
     # Select a random node from the graph's currently unassigned nodes
     random_node = graph.unassigned[utility.random_number(0, len(graph.unassigned)-1)]
+    graph.unassigned.remove(random_node)
 
     for value in graph.domain:
         # Assign the random_node a value in the domain range [0 or 1]
         random_node.set_value(value)
 
+        graph.display_graph()
+
         # Check all of the constraints ensuring the validity of this value allocation
         if graph.check_equivalent_zeroes_and_ones_constraint(random_node.row, random_node.col) and \
-            graph.check_max_two_of_the_same_adjacent_values_constraint(random_node.row, random_node.col, value) and \
-            graph.check_row_and_column_uniqueness_constraint(random_node.row, random_node.col):
-            graph.unassigned.remove(random_node)
-            return solve_back_tracking_random_node_recursive(graph)
+                graph.check_max_two_of_the_same_adjacent_values_constraint(random_node.row, random_node.col, value) and \
+                graph.check_row_and_column_uniqueness_constraint(random_node.row, random_node.col):
 
-    return graph.result
+            result = solve_back_tracking_random_node_recursive(graph)
+
+            if result is not False:
+                return result
+
+    # If no value assignment satisfied the constraints, we need to unassign the node and return a failure
+    random_node.set_value(".")
+    graph.unassigned.append(random_node)
+    return False
 
 
 def main():

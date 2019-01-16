@@ -15,14 +15,13 @@ class Graph:
         self.vertices = {}
         self.unassigned = []
         self.assigned = []
-        self.result = False
 
     def add_vertex(self, row, col, value):
         id = str(row) + str(col)
         if id not in self.vertices:
             v = Vertex(row, col, value)
             self.vertices[id] = v
-            if value is not 0 or value is not 1:
+            if value == ".":
                 self.unassigned.append(v)
 
     def get_vertex(self, id):
@@ -123,9 +122,4 @@ class Graph:
                 return False
 
         return satisfies_constraint
-
-
-
-
-
 
