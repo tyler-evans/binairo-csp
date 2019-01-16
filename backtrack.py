@@ -56,9 +56,11 @@ def solve_back_tracking_random_node_recursive(graph):
         random_node.set_value(value)
 
         # Check all of the constraints ensuring the validity of this value allocation
-        result = graph.check_equivalent_zeroes_and_ones_constraint(random_node.row, random_node.col)
-        result = graph.check_max_two_of_the_same_adjacent_values_constraint(random_node.row, random_node.col, value)
-        result = graph.check_row_and_column_uniqueness_constraint(random_node.row, random_node.col)
+        if graph.check_equivalent_zeroes_and_ones_constraint(random_node.row, random_node.col) and \
+            graph.check_max_two_of_the_same_adjacent_values_constraint(random_node.row, random_node.col, value) and \
+            graph.check_row_and_column_uniqueness_constraint(random_node.row, random_node.col):
+            graph.unassigned.remove(random_node)
+            return solve_back_tracking_random_node_recursive(graph)
 
     return graph.result
 
@@ -67,7 +69,8 @@ def main():
     board = initialize_board()
     graph = initialize_graph_from_board(board)
 
-    solved_graph = solve_back_tracking_random_node(graph)
+    solve_back_tracking_random_node(graph)
+    graph.display_graph()
 
 
 if __name__ == "__main__":

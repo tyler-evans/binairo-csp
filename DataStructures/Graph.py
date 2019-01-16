@@ -74,18 +74,27 @@ class Graph:
 
     # Ensure that no more than two "0's" or "1's" are placed adjacent to one another
     def check_max_two_of_the_same_adjacent_values_constraint(self, row, col, value):
-        same_adjacent_values = 0
+        above_rows, below_rows, right_cols, left_cols = 0, 0, 0, 0
 
-        if row - 1 >= 0 and self.vertices[str(row - 1) + str(col)].value == value:
-            same_adjacent_values += 1
-        if row + 1 < self.dimensions and self.vertices[str(row + 1) + str(col)].value == value:
-            same_adjacent_values += 1
-        if col - 1 >= 0 and self.vertices[str(row) + str(col - 1)].value == value:
-            same_adjacent_values += 1
-        if col + 1 < self.dimensions and self.vertices[str(row) + str(col + 1)].value == value:
-            same_adjacent_values += 1
+        for i in range(1, 3):
+            if row - i >= 0 and self.vertices[str(row - 1) + str(col)].value == value and self.vertices[str(row - i) + str(col)].value == value:
+                above_rows += 1
 
-        return same_adjacent_values <= 2
+            if row + i < self.dimensions and self.vertices[str(row + 1) + str(col)].value == value and self.vertices[str(row + i) + str(col)].value == value:
+                below_rows += 1
+
+            if col - i >= 0 and self.vertices[str(row) + str(col-1)].value == value and self.vertices[str(row) + str(col - i)].value == value:
+                left_cols += 1
+
+            if col + i < self.dimensions and self.vertices[str(row) + str(col+1)].value == value and self.vertices[str(row) + str(col + i)].value == value:
+                right_cols += 1
+
+        # Add up the row + cols values and add 1 because of the node's value we're checking
+        max_similar_adjacency_values = max(above_rows+below_rows, left_cols+right_cols)
+
+        # A result of 2 or more indicates 2 other values adjacent to the node have the same value -> return False
+        # A result of 1 or less indicates a max of 1 other adjacent node shares the value -> return True
+        return max_similar_adjacency_values <= 1
 
     # Ensure that all rows and columns are unique within the CSP graph
     def check_row_and_column_uniqueness_constraint(self, row, col):
@@ -94,11 +103,11 @@ class Graph:
         # Ensure that the row and column the node exists in is completely filled with values, otherwise
         # there is no need to further check this constraint since it is guaranteed to be unique due to unassigned values
         for i in range(self.dimensions):
-            if self.vertices[str(row) + str(i)].value == "_":
+            if self.vertices[str(row) + str(i)].value == ".":
                 return satisfies_constraint
 
         for i in range(self.dimensions):
-            if self.vertices[str(i) + str(col)].value == "_":
+            if self.vertices[str(i) + str(col)].value == ".":
                 return satisfies_constraint
 
         # Build a list of all rows and columns
@@ -108,14 +117,10 @@ class Graph:
             rows_and_cols.append([self.vertices[str(i)+str(j)].value for j in range(self.dimensions)])
             rows_and_cols.append([self.vertices[str(j)+str(i)].value for j in range(self.dimensions)])
 
-        unique_rows_and_cols = []
+        # A non-unique row or column will trigger an early return indicating non-uniqueness
         for value in rows_and_cols:
-            if value not in unique_rows_and_cols:
-                unique_rows_and_cols.append(value)
-
-        # A non-unique row or column will violate this property
-        if len(unique_rows_and_cols) < len(rows_and_cols):
-            satisfies_constraint = False
+            if "." not in value and rows_and_cols.count(value) > 1:
+                return False
 
         return satisfies_constraint
 
