@@ -1,72 +1,111 @@
-import os
-from Board.Board import Board
-from DataStructures.Graph import Graph
-from DataStructures.Utility import Utility
+import random
+import time
 
-utility = Utility()
-
-
-def initialize_board():
-    board_data = Board.read_board(open(os.getcwd() + '\\Data\\simple_example.txt').readlines())
-    board = Board(*board_data)
-    return board
+from DataUtility.ReadData import read_board
+from CSPBuilding.CSPBuilding import construct_variables, construct_constraints
+from DataStructures.CSP import CSP
+from Heuristic.Heuristic import random_heuristic, most_constrained_heuristic
 
 
-def initialize_graph_from_board(board):
-    graph = Graph()
-    graph.dimensions = board.n
+def recursive_backtracking(csp, heuristic):
+    if csp.is_solution_board():
+        return csp
 
-    # Add all the vertices to the CSP graph given the input board array
-    for r, row in enumerate(board._to_string_array()):
-        for c, col in enumerate(row):
-            # Add the vertex with "id" r+c with initial value based on input
-            graph.add_vertex(r, c, col)
+    unassigned_variables = csp.unassigned_variables
+    if not unassigned_variables:
+        return -1
 
-    # Add all valid corresponding neighbours as edges in the CSP graph
-    for v in graph:
-        r, c = v.get_row(), v.get_col()
-        graph.add_edge(v.id, str(r - 1) + str(c)) if r - 1 > 0 else None
-        graph.add_edge(v.id, str(r + 1) + str(c)) if r + 1 < len(row) else None
-        graph.add_edge(v.id, str(r) + str(c - 1)) if c - 1 > 0 else None
-        graph.add_edge(v.id, str(r) + str(c + 1)) if c + 1 < len(row) else None
+    variable = heuristic(unassigned_variables, csp)
+    if not variable:
+        return -1
 
-    for v in graph:
-            print(v)
+    for d in variable.domain:
 
-    for v in graph.unassigned:
-        print(v)
+        # if value is consistent
+        variable.value = d
+        if csp.is_valid_board():
+            result = recursive_backtracking(csp, heuristic)
+            if result != -1:  # didn't fail
+                return result
+            variable.value = None
+        else:
+            # revert value
+            variable.value = None
 
-    return graph
-
-
-def solve_back_tracking_random_node(graph):
-    return solve_back_tracking_random_node_recursive(graph)
+    return -1
 
 
-def solve_back_tracking_random_node_recursive(graph):
-    if graph.unassigned is []:
-        graph.result = True
-        return graph
+def time_solve(path, heuristic):
+    board, n = read_board(path)
+    print('\n'.join([''.join(r) for r in board]), '\n')
 
-    # Select a random node from the graph's currently unassigned nodes
-    random_node = graph.unassigned[utility.random_number(0, len(graph.unassigned)-1)]
+    row_vars, col_vars = construct_variables(board, n)
+    constraints = construct_constraints(row_vars, col_vars, n)
+    csp = CSP(row_vars, col_vars, constraints, n)
 
-    for value in graph.domain:
-        # Assign the random_node a value in the domain range [0 or 1]
-        random_node.set_value(value)
+    start_time = time.time()
+    result = recursive_backtracking(csp, heuristic)
+    total_time = time.time() - start_time
+    print(result)
+    print('Total time: ', total_time)
 
-        # Check all of the constraints ensuring the validity of this value allocation
-        graph.check_equivalent_zeroes_and_ones_constraint(random_node.row, random_node.col)
-        #TODO: This is only one of the constraints, will implement the rest later on
-
-    return graph.result
+    return result, total_time
 
 
 def main():
-    board = initialize_board()
-    graph = initialize_graph_from_board(board)
+    random.seed(1)
 
-    solved_graph = solve_back_tracking_random_node(graph)
+    # Debugging example
+    data, n = read_board('Data/example_1.txt')
+    print(data, f'{n}x{n}')
+
+    row_vars, col_vars = construct_variables(data, n)
+    constraints = construct_constraints(row_vars, col_vars, n)
+    csp = CSP(row_vars, col_vars, constraints, n)
+
+    print('\n', len(csp.constraints), 'constraints and', len(csp.variables), 'variables')
+    print('domain sizes: ', [len(v.domain) for v in csp.unassigned_variables])
+
+    start_time = time.time()
+    result = recursive_backtracking(csp, random_heuristic)
+    total_time = time.time() - start_time
+
+    print(result)
+    print('Total time: ', total_time)
+
+    # Go through some timings
+    # TODO Implement node counting
+    boards = {
+        6: 'Data/6x6_very_hard.txt',
+        8: 'Data/8x8_example.txt',
+        10: 'Data/10x10_example.txt',
+        12: 'Data/12x12_example.txt',
+        14: 'Data/14x14_example.txt'
+    }
+
+    print('\n', '='*64)
+    board_path = boards[6]
+    heuristic = most_constrained_heuristic
+    print('Solving board at', board_path, 'with heuristic:', heuristic.__name__)
+    result, total_time = time_solve(board_path, heuristic)
+
+    print('\n', '='*64)
+    board_path = boards[8]
+    heuristic = most_constrained_heuristic
+    print('Solving board at', board_path, 'with heuristic:', heuristic.__name__)
+    result, total_time = time_solve(board_path, heuristic)
+
+    print('\n', '='*64)
+    board_path = boards[6]
+    heuristic = random_heuristic
+    print('Solving board at', board_path, 'with heuristic:', heuristic.__name__)
+    result, total_time = time_solve(board_path, heuristic)
+
+    print('\n', '='*64)
+    board_path = boards[8]
+    heuristic = random_heuristic
+    print('Solving board at', board_path, 'with heuristic:', heuristic.__name__)
+    result, total_time = time_solve(board_path, heuristic)
 
 
 if __name__ == "__main__":
