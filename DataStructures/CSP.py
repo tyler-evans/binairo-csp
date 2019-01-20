@@ -25,7 +25,7 @@ class CSP:
         return counts
 
     def get_constraint_strs(self):
-        return [(i, str(c), c.__bool__()) for i, c in enumerate(self.constraints)]
+        return [(i, str(c), bool(c)) for i, c in enumerate(self.constraints)]
 
     @property
     def unassigned_variables(self):
@@ -39,6 +39,11 @@ class CSP:
 
     def is_solution_board(self):
         return self.is_full_board() and self.is_valid_board()
+
+    def get_relevant_constraint(self, var_0, var_1):
+        for c in self.constraints:
+            if var_0 in c and var_1 in c:
+                return c
 
     def __str__(self):
         n = self.n
