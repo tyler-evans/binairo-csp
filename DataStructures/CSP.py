@@ -32,7 +32,7 @@ class CSP:
         return [v for v in self.variables if v.unassigned]
 
     def is_valid_board(self):
-        return all(self.constraints)
+        return all([len(v.domain) > 0 for v in self.variables]) and all(self.constraints)
 
     def is_full_board(self):
         return all([v.value is not None for v in self.variables])
@@ -44,6 +44,12 @@ class CSP:
         for c in self.constraints:
             if var_0 in c and var_1 in c:
                 return c
+
+    # bind values to variables that have domains of size 1
+    def assign_trivial_variables(self):
+        for v in self.unassigned_variables:
+            if len(v.domain) == 1:
+                v.value = list(v.domain)[0]
 
     def __str__(self):
         n = self.n

@@ -39,10 +39,3 @@ def AC_3(csp):
                 queue.append((X_k, X_i))
 
     return csp
-
-
-# bind values to variables that have domains of size 1
-def assign_trivial_variables(all_variables):
-    for v in all_variables:
-        if len(v.domain) == 1:
-            v.value = list(v.domain)[0]
