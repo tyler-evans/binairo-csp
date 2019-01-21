@@ -69,7 +69,7 @@ def main():
     for puzzle_no in range(1, 100):
 
         do_dropout = True
-        dropout = 1.0
+        dropout = 0.5
         difficulty = 4
         n = 14
         data = scrape_board(difficulty, puzzle_no, n)
