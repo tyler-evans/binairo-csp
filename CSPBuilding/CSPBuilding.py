@@ -6,9 +6,10 @@ from DataStructures.Variable import Variable
 from DataStructures.Constraint import Constraint
 
 
+# Filter out all unary constraints as follows:
 # Construct all permutations of "0's" and "1's" in a list of size n ->
-# find all possible permutations in which the number of "0's" and "1's" in the list are both equivalent (n//2) ->
-# find all possible permutations in which there are no 3 adjacent "0's" and "1's" in a row ->
+# such that the number of "0's" and "1's" in the list are both equivalent (n//2) ->
+# such that there are no 3 adjacent "0's" and "1's" in a row ->
 # these are all of the "valid" constraints for the binairo problem -> return them
 def construct_valid_domain(n):
     domain = itertools.product([0,1], repeat=n)

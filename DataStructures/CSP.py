@@ -17,7 +17,7 @@ class CSP:
         variable.value = old_value
         return result
 
-    def get_unasigned_domain_num_consistent_counts(self):
+    def get_unassigned_domain_num_consistent_counts(self):
         counts = {v: 0 for v in self.unassigned_variables}
         for v in self.unassigned_variables:
             for d in v.domain:
