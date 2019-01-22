@@ -18,6 +18,7 @@ def backtracking_with_forward_checking(csp, heuristic):
     #csp.assign_trivial_variables()
 
     result = recursive_backtracking_with_forward_checking(csp, heuristic, node_tracker)
+    node_tracker.end()
     return result, node_tracker
 
 
@@ -96,7 +97,9 @@ def main():
         csp, node_tracker = backtracking_with_forward_checking(csp, random_heuristic)
         print(csp)
 
-        print('\n', puzzle_no, csp.is_solution_board(), 'num_nodes: {}'.format(node_tracker.num_search_nodes))
+        print('\n', puzzle_no, csp.is_solution_board())
+        print('Number of nodes: {}'.format(node_tracker.num_search_nodes))
+        print('Time taken: {:.5f} seconds'.format(node_tracker.get_elapsed_time()))
 
 
 if __name__ == "__main__":
