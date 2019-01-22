@@ -8,15 +8,20 @@ from DataStructures.CSP import CSP
 from Heuristic.Heuristic import random_heuristic
 from ConstraintPropagation.ConstraintPropagation import AC_3
 from Scraper.Scraper import scrape_board
+from DataStructures.NodeTracker import NodeTracker
 
 
 def backtracking_with_forward_checking(csp, heuristic):
+    node_tracker = NodeTracker()
+
     csp = AC_3(csp)
-    csp.assign_trivial_variables()
-    return recursive_backtracking_with_forward_checking(csp, heuristic)
+    #csp.assign_trivial_variables()
+
+    result = recursive_backtracking_with_forward_checking(csp, heuristic, node_tracker)
+    return result, node_tracker
 
 
-def recursive_backtracking_with_forward_checking(csp, heuristic):
+def recursive_backtracking_with_forward_checking(csp, heuristic, node_tracker):
     if csp.is_solution_board():
         return csp
 
@@ -38,11 +43,13 @@ def recursive_backtracking_with_forward_checking(csp, heuristic):
 
 
         csp.unassigned_variables[variable_index].set_value(d)
+        node_tracker.increment()
+
         csp = AC_3(csp)  # perform constraint propagation
-        csp.assign_trivial_variables()  # bind all variables that have a one element domain
+        #csp.assign_trivial_variables()  # bind all variables that have a one element domain
 
         if csp.is_valid_board():  # if value is consistent
-            result = recursive_backtracking_with_forward_checking(csp, heuristic)
+            result = recursive_backtracking_with_forward_checking(csp, heuristic, node_tracker)
             if result != -1:  # didn't fail
                 return result
             csp = deepcopy(old_csp)  # revert assignments
@@ -86,10 +93,10 @@ def main():
         csp = CSP(row_vars, col_vars, constraints, n)
 
         print('solving...')
-        csp = backtracking_with_forward_checking(csp, random_heuristic)
+        csp, node_tracker = backtracking_with_forward_checking(csp, random_heuristic)
         print(csp)
 
-        print('\n', puzzle_no, csp.is_solution_board())
+        print('\n', puzzle_no, csp.is_solution_board(), 'num_nodes: {}'.format(node_tracker.num_search_nodes))
 
 
 if __name__ == "__main__":
