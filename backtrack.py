@@ -6,9 +6,16 @@ from DataUtility.ReadData import read_board, read_individual_board
 from CSPBuilding.CSPBuilding import construct_variables, construct_constraints
 from DataStructures.CSP import CSP
 from Heuristic.Heuristic import random_heuristic, most_constrained_heuristic
+from DataStructures.NodeTracker import NodeTracker
 
 
-def recursive_backtracking(csp, heuristic):
+def backtracking(csp, heuristic):
+    node_tracker = NodeTracker()
+    result = recursive_backtracking(csp, heuristic, node_tracker)
+    return result, node_tracker
+
+
+def recursive_backtracking(csp, heuristic, node_tracker):
     if csp.is_solution_board():
         return csp
 
@@ -24,8 +31,10 @@ def recursive_backtracking(csp, heuristic):
 
         # if value is consistent
         variable.value = d
+        node_tracker.increment()
+
         if csp.is_valid_board():
-            result = recursive_backtracking(csp, heuristic)
+            result = recursive_backtracking(csp, heuristic, node_tracker)
             if result != -1:  # didn't fail
                 return result
             variable.value = None
@@ -49,13 +58,14 @@ def time_solve(path, heuristic, board=None, n=None):
     csp = CSP(row_vars, col_vars, constraints, n)
 
     start_time = time.time()
-    result = recursive_backtracking(csp, heuristic)
+    result, node_tracker = backtracking(csp, heuristic)
     total_time = time.time() - start_time
     print('(Solution)')
     print("{}\n".format(result))
     print('Total Time: {}'.format(total_time))
+    print('Total Nodes: {}'.format(node_tracker.num_search_nodes))
 
-    return result, total_time
+    return result, total_time, node_tracker
 
 
 def debugging_example():
@@ -71,7 +81,7 @@ def debugging_example():
     print('domain sizes: ', [len(v.domain) for v in csp.unassigned_variables])
 
     start_time = time.time()
-    result = recursive_backtracking(csp, random_heuristic)
+    result, node_tracker = backtracking(csp, random_heuristic)
     total_time = time.time() - start_time
 
     print('Solution\n'.format(result))
@@ -92,25 +102,25 @@ def debugging_example():
     board_path = boards[6]
     heuristic = most_constrained_heuristic
     print('Solving board at', board_path, 'with heuristic:', heuristic.__name__)
-    result, total_time = time_solve(board_path, heuristic)
+    result, total_time, node_tracker = time_solve(board_path, heuristic)
 
     print('\n', '='*64)
     board_path = boards[8]
     heuristic = most_constrained_heuristic
     print('Solving board at', board_path, 'with heuristic:', heuristic.__name__)
-    result, total_time = time_solve(board_path, heuristic)
+    result, total_time, node_tracker = time_solve(board_path, heuristic)
 
     print('\n', '='*64)
     board_path = boards[6]
     heuristic = random_heuristic
     print('Solving board at', board_path, 'with heuristic:', heuristic.__name__)
-    result, total_time = time_solve(board_path, heuristic)
+    result, total_time, node_tracker = time_solve(board_path, heuristic)
 
     print('\n', '='*64)
     board_path = boards[8]
     heuristic = random_heuristic
     print('Solving board at', board_path, 'with heuristic:', heuristic.__name__)
-    result, total_time = time_solve(board_path, heuristic)
+    result, total_time, node_tracker = time_solve(board_path, heuristic)
 
 
 # Iterate through all backtracking-heuristic combinations
@@ -128,7 +138,7 @@ def solve():
 
                     # Go through all the heuristics
                     for heuristic in [random_heuristic, most_constrained_heuristic]:
-                        result, total_time = time_solve("", heuristic, board=board, n=n)
+                        result, total_time, node_tracker = time_solve("", heuristic, board=board, n=n)
     else:
         print("File: {} not found".format(file_name))
 
