@@ -4,6 +4,15 @@ import itertools
 from copy import deepcopy
 from DataStructures.Variable import Variable
 from DataStructures.Constraint import Constraint
+from DataStructures.CSP import CSP
+
+
+def construct_csp(board):
+    n = board.shape[0]
+    row_vars, col_vars = construct_variables(board, n)
+    constraints = construct_constraints(row_vars, col_vars, n)
+    csp = CSP(row_vars, col_vars, constraints, n)
+    return csp
 
 
 # Filter out all unary constraints as follows:

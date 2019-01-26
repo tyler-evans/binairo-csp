@@ -18,6 +18,6 @@ class NodeTracker:
         return self.end_time - self.start_time
 
     def __str__(self):
-        result = 'Number of nodes: {}'.format(self.num_search_nodes)
-        result += '\nTime: {:.5f} seconds'.format(self.get_elapsed_time())
+        result = '\tNumber of nodes: {}'.format(self.num_search_nodes)
+        result += '\n\tTime: {:.5f} seconds'.format(self.get_elapsed_time())
         return result

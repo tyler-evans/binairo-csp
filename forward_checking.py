@@ -3,8 +3,7 @@ import numpy as np
 
 from copy import deepcopy
 
-from CSPBuilding.CSPBuilding import construct_variables, construct_constraints
-from DataStructures.CSP import CSP
+from CSPBuilding.CSPBuilding import construct_csp
 from Heuristic.Heuristic import random_heuristic, most_constrained_node_heuristic, most_constraining_node_heuristic
 from ConstraintPropagation.ConstraintPropagation import AC_3
 from Scraper.Scraper import scrape_board
@@ -76,9 +75,7 @@ def scrape_and_solve_boards():
                     if not mask:
                         data[i][j] = '_'
 
-        row_vars, col_vars = construct_variables(data, n)
-        constraints = construct_constraints(row_vars, col_vars, n)
-        csp = CSP(row_vars, col_vars, constraints, n)
+        csp = construct_csp(data)
 
         csp, node_tracker = backtracking_with_forward_checking(csp, heuristics['random'])
         assert csp.is_solution_board()
@@ -90,33 +87,38 @@ def scrape_and_solve_boards():
 def main():
 
     # TODO: Accept user input for puzzle path
+    file_name = 'Data/binairo_evaluation.txt'
+    num_repeat_solve = 3
+    print_solutions = False
 
     heuristics = {'random': random_heuristic,
                   'most_constrained': lambda x: most_constrained_node_heuristic(x, True),
                   'most_constraining': lambda x: most_constraining_node_heuristic(x, True)}
 
-    np.random.seed(42)
-    random.seed(42)
+    seed = random.randint(0, 4190)
+    np.random.seed(seed)
+    random.seed(seed)
+    print('Experiment seed: {}\n'.format(seed))
 
-    file_name = 'Data/binairo_evaluation.txt'
     all_boards = read_boards_from_file(file_name)
 
     for board in all_boards:
-        n = board.shape[0]
-        row_vars, col_vars = construct_variables(board, n)
-        constraints = construct_constraints(row_vars, col_vars, n)
-        csp = CSP(row_vars, col_vars, constraints, n)
+
+        csp = construct_csp(board)
 
         for heuristic_name, heuristic in heuristics.items():
-            new_csp = deepcopy(csp)
+            print('Solving {}x{} board with {} heuristic'.format(csp.n, csp.n, heuristic_name))
 
-            print('Solving {}x{} board with {} heuristic'.format(n, n, heuristic_name))
-            result, node_tracker = backtracking_with_forward_checking(new_csp, heuristic)
-            assert result.is_solution_board()
+            for solve_number in range(num_repeat_solve):
+                result, node_tracker = backtracking_with_forward_checking(deepcopy(csp), heuristic)
+                assert result.is_solution_board()
 
-            #print('Solution:')
-            #print(result)
-            print(node_tracker)
+                if print_solutions:
+                    print('Solution:')
+                    print(result)
+
+                print(solve_number + 1, node_tracker)
+
             print('-'*50)
 
 
