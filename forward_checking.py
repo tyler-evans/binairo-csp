@@ -5,7 +5,7 @@ from copy import deepcopy
 
 from CSPBuilding.CSPBuilding import construct_variables, construct_constraints
 from DataStructures.CSP import CSP
-from Heuristic.Heuristic import random_heuristic
+from Heuristic.Heuristic import random_heuristic, most_constrained_node_heuristic, most_constraining_node_heuristic
 from ConstraintPropagation.ConstraintPropagation import AC_3
 from Scraper.Scraper import scrape_board
 from DataStructures.NodeTracker import NodeTracker
@@ -15,7 +15,6 @@ def backtracking_with_forward_checking(csp, heuristic):
     node_tracker = NodeTracker()
 
     csp = AC_3(csp)
-    #csp.assign_trivial_variables()
 
     result = recursive_backtracking_with_forward_checking(csp, heuristic, node_tracker)
     node_tracker.end()
@@ -25,37 +24,25 @@ def backtracking_with_forward_checking(csp, heuristic):
 def recursive_backtracking_with_forward_checking(csp, heuristic, node_tracker):
     if csp.is_solution_board():
         return csp
-
-    if 0 in [len(v.domain) for v in csp.variables]:
+    if 0 in [len(v.domain) for v in csp.variables] or not csp.unassigned_variables:
         return -1
 
-    #unassigned_variables = csp.unassigned_variables
-    if not csp.unassigned_variables:
-        return -1
-
-    #variable = heuristic(unassigned_variables, csp)
-    # TODO Heuristics modified to support new variable index approach
-    variable_index = 0
-    # if not variable:
-    #     return -1
+    # get index of next unassigned variable to try
+    variable_index = heuristic(csp)
 
     old_csp = deepcopy(csp)
-    for d in list(csp.unassigned_variables[variable_index].domain):
+    for d in list(csp.variables[variable_index].domain):
 
-
-        csp.unassigned_variables[variable_index].set_value(d)
+        csp.variables[variable_index].set_value(d)
         node_tracker.increment()
 
         csp = AC_3(csp)  # perform constraint propagation
-        #csp.assign_trivial_variables()  # bind all variables that have a one element domain
 
         if csp.is_valid_board():  # if value is consistent
             result = recursive_backtracking_with_forward_checking(csp, heuristic, node_tracker)
             if result != -1:  # didn't fail
                 return result
-            csp = deepcopy(old_csp)  # revert assignments
-        else:
-            csp = deepcopy(old_csp)  # revert assignments
+        csp = deepcopy(old_csp)  # revert assignments
 
     return -1
 
@@ -67,14 +54,15 @@ def main():
     # and solve using constraint prop (no heuristic)
     ##########################################################################
 
-    # TODO: Heuristics return index into `csp.unassigned_variables`
-    # TODO: Implement all heuristics
-    # TODO: Accept user input for puzzle
-    # TODO: Clean up
+    # TODO: Accept user input for puzzle path
+
+    heuristics = {'random': random_heuristic,
+                  'most_constrained': lambda x: most_constrained_node_heuristic(x, True),
+                  'most_constraining': lambda x: most_constraining_node_heuristic(x, True)}
 
     np.random.seed(42)
     random.seed(42)
-    for puzzle_no in range(1, 100):
+    for puzzle_no in range(1, 5):
 
         do_dropout = True
         dropout = 0.5
@@ -93,13 +81,13 @@ def main():
         constraints = construct_constraints(row_vars, col_vars, n)
         csp = CSP(row_vars, col_vars, constraints, n)
 
-        print('solving...')
-        csp, node_tracker = backtracking_with_forward_checking(csp, random_heuristic)
-        print(csp)
+        #print('solving...')
+        csp, node_tracker = backtracking_with_forward_checking(csp, heuristics['random'])
+        assert csp.is_solution_board()
+        #print(csp)
 
-        print('\n', puzzle_no, csp.is_solution_board())
-        print('Number of nodes: {}'.format(node_tracker.num_search_nodes))
-        print('Time taken: {:.5f} seconds'.format(node_tracker.get_elapsed_time()))
+        print('Puzzle no:', puzzle_no, 'Number of nodes:', node_tracker.num_search_nodes)
+        #print('Time taken: {:.5f} seconds'.format(node_tracker.get_elapsed_time()))
 
 
 if __name__ == "__main__":

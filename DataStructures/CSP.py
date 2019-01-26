@@ -17,12 +17,8 @@ class CSP:
         variable.value = old_value
         return result
 
-    def get_unassigned_domain_num_consistent_counts(self):
-        counts = {v: 0 for v in self.unassigned_variables}
-        for v in self.unassigned_variables:
-            for d in v.domain:
-                counts[v] += self.is_valid_change(v, d)
-        return counts
+    def count_num_consistent_values(self, variable):
+        return sum([self.is_valid_change(variable, value) for value in variable.domain])
 
     def get_constraint_strs(self):
         return [(i, str(c), bool(c)) for i, c in enumerate(self.constraints)]
@@ -44,12 +40,6 @@ class CSP:
         for c in self.constraints:
             if var_0 in c and var_1 in c:
                 return c
-
-    # bind values to variables that have domains of size 1
-    def assign_trivial_variables(self):
-        for v in self.unassigned_variables:
-            if len(v.domain) == 1:
-                v.value = list(v.domain)[0]
 
     def __str__(self):
         n = self.n

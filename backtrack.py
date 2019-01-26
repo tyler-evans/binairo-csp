@@ -5,7 +5,7 @@ import os
 from DataUtility.ReadData import read_board, read_individual_board
 from CSPBuilding.CSPBuilding import construct_variables, construct_constraints
 from DataStructures.CSP import CSP
-from Heuristic.Heuristic import random_heuristic, most_constrained_heuristic
+from Heuristic.Heuristic import random_heuristic, most_constrained_node_heuristic, most_constraining_node_heuristic
 from DataStructures.NodeTracker import NodeTracker
 
 
@@ -19,33 +19,29 @@ def recursive_backtracking(csp, heuristic, node_tracker):
     if csp.is_solution_board():
         return csp
 
-    unassigned_variables = csp.unassigned_variables
-    if not unassigned_variables:
+    if not csp.unassigned_variables:
         return -1
 
-    variable = heuristic(unassigned_variables, csp)
-    if not variable:
-        return -1
+    # get index of next unassigned variable to try
+    variable_index = heuristic(csp)
 
-    for d in variable.domain:
+    for d in list(csp.variables[variable_index].domain):
 
-        # if value is consistent
-        variable.value = d
+        csp.variables[variable_index].value = d
         node_tracker.increment()
 
         if csp.is_valid_board():
             result = recursive_backtracking(csp, heuristic, node_tracker)
             if result != -1:  # didn't fail
                 return result
-            variable.value = None
-        else:
-            # revert value
-            variable.value = None
+        csp.variables[variable_index].value = None  # revert value
 
     return -1
 
 
-def time_solve(path, heuristic, board=None, n=None):
+def time_solve(path, heuristic, board=None, n=None, heuristic_name=''):
+    if heuristic_name:
+        heuristic.__name__ = heuristic_name
     if board is None or n is None:
         board, n = read_board(path)
 
@@ -100,13 +96,13 @@ def debugging_example():
 
     print('\n', '='*64)
     board_path = boards[6]
-    heuristic = most_constrained_heuristic
+    heuristic = lambda x: most_constrained_node_heuristic(x, False)
     print('Solving board at', board_path, 'with heuristic:', heuristic.__name__)
     result, total_time, node_tracker = time_solve(board_path, heuristic)
 
     print('\n', '='*64)
     board_path = boards[8]
-    heuristic = most_constrained_heuristic
+    heuristic = lambda x: most_constrained_node_heuristic(x, False)
     print('Solving board at', board_path, 'with heuristic:', heuristic.__name__)
     result, total_time, node_tracker = time_solve(board_path, heuristic)
 
@@ -137,8 +133,11 @@ def solve():
                     data.clear()
 
                     # Go through all the heuristics
-                    for heuristic in [random_heuristic, most_constrained_heuristic]:
-                        result, total_time, node_tracker = time_solve("", heuristic, board=board, n=n)
+                    heuristics = {'random': random_heuristic,
+                                  'most_constrained': lambda x: most_constrained_node_heuristic(x, False),
+                                  'most_constraining': lambda x: most_constraining_node_heuristic(x, False)}
+                    for name, heuristic in heuristics.items():
+                        result, total_time, node_tracker = time_solve("", heuristic, board=board, n=n, heuristic_name=name)
     else:
         print("File: {} not found".format(file_name))
 
