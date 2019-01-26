@@ -22,7 +22,7 @@ def backtracking_with_forward_checking(csp, heuristic):
 
 
 def recursive_backtracking_with_forward_checking(csp, heuristic, node_tracker):
-    if csp.is_solution_board():
+    if csp.is_solution_board() or node_tracker.out_of_time():
         return csp
     if 0 in [len(v.domain) for v in csp.variables] or not csp.unassigned_variables:
         return -1
@@ -78,7 +78,7 @@ def scrape_and_solve_boards():
         csp = construct_csp(data)
 
         csp, node_tracker = backtracking_with_forward_checking(csp, heuristics['random'])
-        assert csp.is_solution_board()
+        assert csp.is_solution_board() or node_tracker.out_of_time()
         #print(csp)
 
         print(node_tracker)
@@ -87,6 +87,7 @@ def scrape_and_solve_boards():
 def main():
 
     # TODO: Accept user input for puzzle path
+
     file_name = 'Data/binairo_evaluation.txt'
     num_repeat_solve = 3
     print_solutions = False
@@ -111,7 +112,7 @@ def main():
 
             for solve_number in range(num_repeat_solve):
                 result, node_tracker = backtracking_with_forward_checking(deepcopy(csp), heuristic)
-                assert result.is_solution_board()
+                assert result.is_solution_board()or node_tracker.out_of_time()
 
                 if print_solutions:
                     print('Solution:')

@@ -17,7 +17,7 @@ def backtracking(csp, heuristic):
 
 
 def recursive_backtracking(csp, heuristic, node_tracker):
-    if csp.is_solution_board():
+    if csp.is_solution_board() or node_tracker.out_of_time():
         return csp
 
     if not csp.unassigned_variables:
@@ -67,7 +67,7 @@ def main():
 
             for solve_number in range(num_repeat_solve):
                 result, node_tracker = backtracking(deepcopy(csp), heuristic)
-                assert result.is_solution_board()
+                assert result.is_solution_board() or node_tracker.out_of_time()
 
                 if print_solutions:
                     print('Solution:')
