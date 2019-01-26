@@ -2,7 +2,7 @@ import random
 import time
 import os
 
-from DataUtility.ReadData import read_board, read_individual_board
+from DataUtility.ReadData import read_board, read_boards_from_file
 from CSPBuilding.CSPBuilding import construct_variables, construct_constraints
 from DataStructures.CSP import CSP
 from Heuristic.Heuristic import random_heuristic, most_constrained_node_heuristic, most_constraining_node_heuristic
@@ -39,11 +39,13 @@ def recursive_backtracking(csp, heuristic, node_tracker):
     return -1
 
 
-def time_solve(path, heuristic, board=None, n=None, heuristic_name=''):
+def time_solve(path, heuristic, board=None, heuristic_name=''):
     if heuristic_name:
         heuristic.__name__ = heuristic_name
-    if board is None or n is None:
+    if board is None:
         board, n = read_board(path)
+    else:
+        n = board.shape[0]
 
     print(60*'=')
     print('Solving ({}x{}) board with ({})'.format(n, n, heuristic.__name__))
@@ -121,25 +123,16 @@ def debugging_example():
 
 # Iterate through all backtracking-heuristic combinations
 def solve():
-    file_name, separator = 'Data/binairo_samples.txt', "#End"
-    if os.path.isfile(file_name):
-        with open(file_name) as board_file:
-            data = []
-            for line in board_file.readlines():
-                data.append(line)
-                if separator in line:
-                    # Read in the board and compute it's dimensionality
-                    board, n = read_individual_board(data)
-                    data.clear()
+    file_name = 'Data/binairo_evaluation.txt'
+    all_boards = read_boards_from_file(file_name)
 
-                    # Go through all the heuristics
-                    heuristics = {'random': random_heuristic,
-                                  'most_constrained': lambda x: most_constrained_node_heuristic(x, False),
-                                  'most_constraining': lambda x: most_constraining_node_heuristic(x, False)}
-                    for name, heuristic in heuristics.items():
-                        result, total_time, node_tracker = time_solve("", heuristic, board=board, n=n, heuristic_name=name)
-    else:
-        print("File: {} not found".format(file_name))
+    heuristics = {'random': random_heuristic,
+                  'most_constrained': lambda x: most_constrained_node_heuristic(x, False),
+                  'most_constraining': lambda x: most_constraining_node_heuristic(x, False)}
+
+    for board in all_boards:
+        for name, heuristic in heuristics.items():
+            result, total_time, node_tracker = time_solve("", heuristic, board=board, heuristic_name=name)
 
 
 def main():
