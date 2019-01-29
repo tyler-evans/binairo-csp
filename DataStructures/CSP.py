@@ -8,6 +8,7 @@ class CSP:
         self.col_vars = col_vars
         self.variables = row_vars + col_vars
         self.constraints = constraints
+        self.visited = []
         self.n = n
 
     def is_valid_change(self, variable, value):
@@ -24,12 +25,23 @@ class CSP:
                 counts[v] += self.is_valid_change(v, d)
         return counts
 
+    def get_unassigned_domain_greater_than_one_domain_num_consistent_counts(self, variables):
+        counts = {v: 0 for v in variables}
+        for v in variables:
+            for d in v.domain:
+                counts[v] += self.is_valid_change(v, d)
+        return counts
+
     def get_constraint_strs(self):
-        return [(i, str(c), c.__bool__()) for i, c in enumerate(self.constraints)]
+        return [(i, str(c), bool(c)) for i, c in enumerate(self.constraints)]
 
     @property
     def unassigned_variables(self):
         return [v for v in self.variables if v.unassigned]
+
+    @property
+    def unassigned_variables_greater_than_one_domain(self):
+        return [v for v in self.variables if v.unassigned and len(v.domain) > 1]
 
     def is_valid_board(self):
         return all(self.constraints)
@@ -39,6 +51,18 @@ class CSP:
 
     def is_solution_board(self):
         return self.is_full_board() and self.is_valid_board()
+
+    def get_relevant_constraint(self, var_0, var_1):
+        for c in self.constraints:
+            if var_0 in c and var_1 in c:
+                return c
+
+    def get_associated_constraints(self, var):
+        constraints = []
+        for c in self.constraints:
+            if var in c:
+                constraints.append(c)
+        return constraints
 
     def __str__(self):
         n = self.n

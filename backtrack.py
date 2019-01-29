@@ -1,6 +1,7 @@
 import random
 import time
 import os
+import copy
 
 from DataUtility.ReadData import read_board, read_individual_board
 from CSPBuilding.CSPBuilding import construct_variables, construct_constraints
@@ -11,6 +12,16 @@ from Heuristic.Heuristic import random_heuristic, most_constrained_heuristic
 def recursive_backtracking(csp, heuristic):
     if csp.is_solution_board():
         return csp
+
+    # start_time = time.time()
+
+    # check_list = []
+    # for i in range(10000):
+    #     copy_csp = copy.deepcopy(csp)
+    #     check_list.append(copy_csp)
+    #
+    # total_time = time.time() - start_time
+    # print('Total Time: {}'.format(total_time))
 
     unassigned_variables = csp.unassigned_variables
     if not unassigned_variables:
@@ -61,7 +72,7 @@ def time_solve(path, heuristic, board=None, n=None):
 def debugging_example():
     # KEPT DEBUGGING EXAMPLE FOR FUTURE TESTING PURPOSES IF NEEDED
     data, n = read_board('Data/example_1.txt')
-    print(data, f'{n}x{n}')
+    print(data, '{}x{}'.format(n,n))
 
     row_vars, col_vars = construct_variables(data, n)
     constraints = construct_constraints(row_vars, col_vars, n)
