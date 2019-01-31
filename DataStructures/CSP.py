@@ -64,6 +64,11 @@ class CSP:
                 constraints.append(c)
         return constraints
 
+    def get_arc(self, x_i, x_j):
+        for c in self.constraints:
+            if x_i in c and x_j in c:
+                return c
+
     def __str__(self):
         n = self.n
         board = np.repeat('_', n * n).reshape(n, n)
