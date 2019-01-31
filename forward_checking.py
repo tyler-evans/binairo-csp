@@ -13,27 +13,29 @@ def recursive_forwardchecking(csp, heuristic):
         return csp
 
     heuristic_index = heuristic(csp.unassigned_variables, csp)
+    previous_csp = copy.deepcopy(csp)
 
     # For each available value x in Ai
     for val in csp.unassigned_variables[heuristic_index].domain:
 
         # For each k in (1,2,...,n) -> Define A'k = Ak
-        copy_csp = copy.deepcopy(csp)
-
         # A'i is committed to a value
-        copy_csp.unassigned_variables[heuristic_index].value = val
+        csp.unassigned_variables[heuristic_index].domain = {val}
+        csp.unassigned_variables[heuristic_index].value = val
 
-        print([len(x.domain) for x in csp.variables])
-        print("UNASSIGNED VARS: {}".format(len(csp.unassigned_variables)))
+        # print([len(x.domain) for x in csp.variables])
+        # print("UNASSIGNED VARS: {}".format(len(csp.unassigned_variables)))
 
-        result = propagate(copy_csp)
+        result = propagate(csp)
 
         # We don't need to back track
         if result != -1:
 
-            result = recursive_forwardchecking(copy_csp, heuristic)
+            result = recursive_forwardchecking(csp, heuristic)
             if result != -1:
                 return result
+
+        csp = copy.deepcopy(previous_csp)
 
     return -1
 
@@ -56,51 +58,51 @@ def propagate(csp):
             changed = False
 
             # Reduce all the domains for arcs one way
-            # if v1_original_value is None and v2_original_value is not None:
-            for val in v1.domain:
-                v1.value = val
+            if v1_original_value is None and v2_original_value is not None:
+                for val in v1.domain:
+                    v1.value = val
 
-                if c:
-                    v1_legal_values.add(val)
+                    if c:
+                        v1_legal_values.add(val)
 
-            v1.value = v1_original_value
+                v1.value = v1_original_value
 
-            # Need to backtrack as we've exhausted all the possible options for this Variable's domain
-            if len(v1_legal_values) == 0:
-                return -1
+                # Need to backtrack as we've exhausted all the possible options for this Variable's domain
+                if len(v1_legal_values) == 0:
+                    return -1
 
-            if len(v1_legal_values) == 1:
-                v1.value = max(v1_legal_values)
+                if len(v1_legal_values) == 1:
+                    v1.value, v1.domain = max(v1_legal_values), max(v1_legal_values)
 
-            if len(v1_legal_values) < len(v1.domain):
-                changed = True
-                v1.domain = v1_legal_values
+                if len(v1_legal_values) < len(v1.domain):
+                    changed = True
+                    v1.domain = v1_legal_values
 
-        # Reduce all the domains for arcs the other way
-        # if v2_original_value is None and v1_original_value is not None:
-            for val in v2.domain:
-                v2.value = val
+            # Reduce all the domains for arcs the other way
+            if v2_original_value is None and v1_original_value is not None:
+                for val in v2.domain:
+                    v2.value = val
 
-                if c:
-                    v2_legal_values.add(val)
+                    if c:
+                        v2_legal_values.add(val)
 
-            v2.value = v2_original_value
+                v2.value = v2_original_value
 
-            # Need to backtrack as we've exhausted all the possible options for this Variable's domain
-            if len(v2_legal_values) == 0:
-                return -1
+                # Need to backtrack as we've exhausted all the possible options for this Variable's domain
+                if len(v2_legal_values) == 0:
+                    return -1
 
-            if len(v2_legal_values) == 1:
-                v2.value = max(v2_legal_values)
+                if len(v2_legal_values) == 1:
+                    v2.value, v2.domain = max(v2_legal_values), max(v2_legal_values)
 
-            if len(v2_legal_values) < len(v2.domain):
-                changed = True
-                v2.domain = v2_legal_values
+                if len(v2_legal_values) < len(v2.domain):
+                    changed = True
+                    v2.domain = v2_legal_values
 
-            print([len(x.domain) for x in csp.variables])
-            print("UNASSIGNED VARS: {}".format(len(csp.unassigned_variables)))
-            print(i)
-            print()
+                # print([len(x.domain) for x in csp.variables])
+                # print("UNASSIGNED VARS: {}".format(len(csp.unassigned_variables)))
+                # print(i)
+                # print()
 
             if not csp.unassigned_variables:
                 return
