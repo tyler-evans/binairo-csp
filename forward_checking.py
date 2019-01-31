@@ -20,8 +20,7 @@ def recursive_forwardchecking(csp, heuristic):
 
         # For each k in (1,2,...,n) -> Define A'k = Ak
         # A'i is committed to a value
-        csp.unassigned_variables[heuristic_index].domain = {val}
-        csp.unassigned_variables[heuristic_index].value = val
+        csp.unassigned_variables[heuristic_index].set_value(val)
 
         # print([len(x.domain) for x in csp.variables])
         # print("UNASSIGNED VARS: {}".format(len(csp.unassigned_variables)))

@@ -10,3 +10,4 @@ class Variable:
 
     def set_value(self, val):
         self.value = val
+        self.domain = {val}
