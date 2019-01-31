@@ -1,15 +1,27 @@
-import copy
-import time
-import os
+import random
+import numpy as np
 
-from DataUtility.ReadData import read_board, read_individual_board
-from CSPBuilding.CSPBuilding import construct_variables, construct_constraints, update_unassigned_variables
-from DataStructures.CSP import CSP
-from Heuristic.Heuristic import random_heuristic_index, most_constrained_heuristic_index, most_constraining_heuristic_index
+from copy import deepcopy
+
+from CSPBuilding.CSPBuilding import construct_csp
+from Heuristic.Heuristic import random_heuristic, most_constrained_node_heuristic, most_constraining_node_heuristic
+from Scraper.Scraper import scrape_board
+from DataStructures.NodeTracker import NodeTracker
+from DataUtility.ReadData import read_boards_from_file
 from AC3.AC3 import ac3
 
 
-def recursive_forwardchecking(csp, heuristic):
+def backtracking_with_forward_checking(csp, heuristic):
+    node_tracker = NodeTracker()
+
+    csp = ac3(csp)
+
+    result = recursive_forwardchecking(csp, heuristic, node_tracker)
+    node_tracker.end()
+    return result, node_tracker
+
+
+def recursive_forwardchecking(csp, heuristic, node_tracker):
     # Finished
     if csp.is_solution_board() and not csp.unassigned_variables:
         return csp
@@ -19,70 +31,107 @@ def recursive_forwardchecking(csp, heuristic):
         if len(x_k.domain) == 0:
             return -1
 
-    heuristic_index = heuristic(csp.unassigned_variables, csp)
-    previous_csp = copy.deepcopy(csp)
+    heuristic_index = heuristic(csp)
+    previous_csp = deepcopy(csp)
 
     # For each available value x in Ai
-    for val in list(csp.unassigned_variables[heuristic_index].domain):
+    for val in list(csp.variables[heuristic_index].domain):
 
         # For each k in (1,2,...,n) -> Define A'k = Ak
         # A'i is committed to a value
-        csp.unassigned_variables[heuristic_index].set_value(val)
-
- 
+        csp.variables[heuristic_index].commit_value(val)
+        node_tracker.increment()
 
         csp = ac3(csp)
 
         # We don't need to back track
         if csp.is_valid_board():
 
-            csp_result = recursive_forwardchecking(csp, heuristic)
+            csp_result = recursive_forwardchecking(csp, heuristic, node_tracker)
             if csp_result != -1:
                 return csp_result
 
-        csp = copy.deepcopy(previous_csp)
+        csp = deepcopy(previous_csp)
 
     return -1
 
 
-def time_solve(board, n, heuristic):
-    print(60*'=')
-    print('Solving ({}x{}) board with ({})'.format(n, n, heuristic.__name__))
-    print('\n'.join([''.join(r) for r in board]), '\n')
+def scrape_and_solve_boards():
 
-    # Construct all legal values for each row + column Variable in the CSP graph
-    row_vars, col_vars = construct_variables(board, n)
-    constraints = construct_constraints(row_vars, col_vars, n)
-    csp = CSP(row_vars, col_vars, constraints, n)
-    ac3(csp)
-    start_time = time.time()
-    result = recursive_forwardchecking(csp, heuristic)
-    total_time = time.time() - start_time
-    print('(Solution)')
-    print("{}\n".format(result))
-    print('Total Time: {}'.format(total_time))
+    ##########################################################################
+    # For POC, scrape some vhard 14x14 puzzles, apply dropout (to make harder)
+    # and solve using constraint prop (no heuristic)
+    ##########################################################################
 
-    return result, total_time
+    heuristics = {'random': random_heuristic,
+                  'most_constrained': lambda x: most_constrained_node_heuristic(x, True),
+                  'most_constraining': lambda x: most_constraining_node_heuristic(x, True)}
+
+    np.random.seed(42)
+    random.seed(42)
+    for puzzle_no in range(1, 5):
+
+        do_dropout = True
+        dropout = 0.5
+        difficulty = 4
+        n = 14
+        data = scrape_board(difficulty, puzzle_no, n)
+
+        if do_dropout:
+            for i in range(n):
+                for j in range(n):
+                    mask = np.random.choice([0, 1], p=[dropout, 1 - dropout])
+                    if not mask:
+                        data[i][j] = '_'
+
+        csp = construct_csp(data)
+
+        csp, node_tracker = backtracking_with_forward_checking(csp, heuristics['random'])
+        assert csp.is_solution_board() or node_tracker.out_of_time()
+        #print(csp)
+
+        print(node_tracker)
 
 
-def solve():
-    file_name, separator = 'Data/binairo_samples.txt', "#End"
-    if os.path.isfile(file_name):
-        with open(file_name) as board_file:
-            data = []
-            for line in board_file.readlines():
-                data.append(line)
-                if separator in line:
-                    # Read in the board and compute it's dimensionality
-                    board, n = read_individual_board(data)
-                    data.clear()
+def main():
 
-                    # Go through all the heuristics
-                    for heuristic in [most_constrained_heuristic_index]:
-                        result, total_time = time_solve(board, n, heuristic)
-    else:
-        print("File: {} not found".format(file_name))
+    # TODO: Accept user input for puzzle path
+
+    file_name = 'Data/binairo_evaluation.txt'
+    num_repeat_solve = 3
+    print_solutions = False
+
+    heuristics = {'random': random_heuristic,
+                  'most_constrained': lambda x: most_constrained_node_heuristic(x, True),
+                  'most_constraining': lambda x: most_constraining_node_heuristic(x, True)}
+
+    seed = random.randint(0, 4190)
+    np.random.seed(seed)
+    random.seed(seed)
+    print('Experiment seed: {}\n'.format(seed))
+
+    all_boards = read_boards_from_file(file_name)
+
+    for board in all_boards:
+
+        csp = construct_csp(board)
+
+        for heuristic_name, heuristic in heuristics.items():
+            print('Solving {}x{} board with {} heuristic'.format(csp.n, csp.n, heuristic_name))
+
+            for solve_number in range(num_repeat_solve):
+                result, node_tracker = backtracking_with_forward_checking(deepcopy(csp), heuristic)
+                assert result.is_solution_board()or node_tracker.out_of_time()
+
+                if print_solutions:
+                    print('Solution:')
+                    print(result)
+
+                print(solve_number + 1, node_tracker)
+
+            print('-'*50)
 
 
 if __name__ == "__main__":
-    solve()
+    main()
+    #scrape_and_solve_boards()

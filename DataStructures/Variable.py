@@ -8,6 +8,6 @@ class Variable:
     def unassigned(self):
         return self.value is None
 
-    def set_value(self, val):
+    def commit_value(self, val):
         self.value = val
         self.domain = {val}

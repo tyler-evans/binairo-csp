@@ -4,7 +4,15 @@ import itertools
 from copy import deepcopy
 from DataStructures.Variable import Variable
 from DataStructures.Constraint import Constraint
+from DataStructures.CSP import CSP
 
+
+def construct_csp(board):
+    n = board.shape[0]
+    row_vars, col_vars = construct_variables(board, n)
+    constraints = construct_constraints(row_vars, col_vars, n)
+    csp = CSP(row_vars, col_vars, constraints, n)
+    return csp
 
 # Construct all permutations of "0's" and "1's" in a list of size n ->
 # find all possible permutations in which the number of "0's" and "1's" in the list are both equivalent (n//2) ->

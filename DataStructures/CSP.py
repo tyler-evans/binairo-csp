@@ -8,7 +8,6 @@ class CSP:
         self.col_vars = col_vars
         self.variables = row_vars + col_vars
         self.constraints = constraints
-        self.visited = []
         self.n = n
 
     def is_valid_change(self, variable, value):
@@ -18,19 +17,8 @@ class CSP:
         variable.value = old_value
         return result
 
-    def get_unasigned_domain_num_consistent_counts(self):
-        counts = {v: 0 for v in self.unassigned_variables}
-        for v in self.unassigned_variables:
-            for d in v.domain:
-                counts[v] += self.is_valid_change(v, d)
-        return counts
-
-    def get_unassigned_domain_greater_than_one_domain_num_consistent_counts(self, variables):
-        counts = {v: 0 for v in variables}
-        for v in variables:
-            for d in v.domain:
-                counts[v] += self.is_valid_change(v, d)
-        return counts
+    def count_num_consistent_values(self, variable):
+        return sum([self.is_valid_change(variable, value) for value in variable.domain])
 
     def get_constraint_strs(self):
         return [(i, str(c), bool(c)) for i, c in enumerate(self.constraints)]
@@ -39,12 +27,8 @@ class CSP:
     def unassigned_variables(self):
         return [v for v in self.variables if v.unassigned]
 
-    @property
-    def unassigned_variables_greater_than_one_domain(self):
-        return [v for v in self.variables if v.unassigned and len(v.domain) > 1]
-
     def is_valid_board(self):
-        return all(self.constraints)
+        return all([len(v.domain) > 0 for v in self.variables]) and all(self.constraints)
 
     def is_full_board(self):
         return all([v.value is not None for v in self.variables])
@@ -56,13 +40,6 @@ class CSP:
         for c in self.constraints:
             if var_0 in c and var_1 in c:
                 return c
-
-    def get_associated_constraints(self, var):
-        constraints = []
-        for c in self.constraints:
-            if var in c:
-                constraints.append(c)
-        return constraints
 
     def get_arc(self, x_i, x_j):
         for c in self.constraints:

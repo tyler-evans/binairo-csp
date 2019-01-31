@@ -1,153 +1,81 @@
 import random
-import time
-import os
-import copy
+import numpy as np
 
-from DataUtility.ReadData import read_board, read_individual_board
-from CSPBuilding.CSPBuilding import construct_variables, construct_constraints
-from DataStructures.CSP import CSP
-from Heuristic.Heuristic import random_heuristic, most_constrained_heuristic
+from copy import deepcopy
+
+from DataUtility.ReadData import read_boards_from_file
+from CSPBuilding.CSPBuilding import construct_csp
+from Heuristic.Heuristic import random_heuristic, most_constrained_node_heuristic, most_constraining_node_heuristic
+from DataStructures.NodeTracker import NodeTracker
 
 
-def recursive_backtracking(csp, heuristic):
-    if csp.is_solution_board():
+def backtracking(csp, heuristic):
+    node_tracker = NodeTracker()
+    result = recursive_backtracking(csp, heuristic, node_tracker)
+    node_tracker.end()
+    return result, node_tracker
+
+
+def recursive_backtracking(csp, heuristic, node_tracker):
+    if csp.is_solution_board() or node_tracker.out_of_time():
         return csp
 
-    # start_time = time.time()
-
-    # check_list = []
-    # for i in range(10000):
-    #     copy_csp = copy.deepcopy(csp)
-    #     check_list.append(copy_csp)
-    #
-    # total_time = time.time() - start_time
-    # print('Total Time: {}'.format(total_time))
-
-    unassigned_variables = csp.unassigned_variables
-    if not unassigned_variables:
+    if not csp.unassigned_variables:
         return -1
 
-    variable = heuristic(unassigned_variables, csp)
-    if not variable:
-        return -1
+    # get index of next unassigned variable to try
+    variable_index = heuristic(csp)
 
-    for d in variable.domain:
+    for d in list(csp.variables[variable_index].domain):
 
-        # if value is consistent
-        variable.value = d
+        csp.variables[variable_index].value = d
+        node_tracker.increment()
+
         if csp.is_valid_board():
-            result = recursive_backtracking(csp, heuristic)
+            result = recursive_backtracking(csp, heuristic, node_tracker)
             if result != -1:  # didn't fail
                 return result
-            variable.value = None
-        else:
-            # revert value
-            variable.value = None
+        csp.variables[variable_index].value = None  # revert value
 
     return -1
 
 
-def time_solve(path, heuristic, board=None, n=None):
-    if board is None or n is None:
-        board, n = read_board(path)
-
-    print(60*'=')
-    print('Solving ({}x{}) board with ({})'.format(n, n, heuristic.__name__))
-    print('\n'.join([''.join(r) for r in board]), '\n')
-
-    row_vars, col_vars = construct_variables(board, n)
-    constraints = construct_constraints(row_vars, col_vars, n)
-    csp = CSP(row_vars, col_vars, constraints, n)
-
-    start_time = time.time()
-    result = recursive_backtracking(csp, heuristic)
-    total_time = time.time() - start_time
-    print('(Solution)')
-    print("{}\n".format(result))
-    print('Total Time: {}'.format(total_time))
-
-    return result, total_time
-
-
-def debugging_example():
-    # KEPT DEBUGGING EXAMPLE FOR FUTURE TESTING PURPOSES IF NEEDED
-    data, n = read_board('Data/example_1.txt')
-    print(data, '{}x{}'.format(n,n))
-
-    row_vars, col_vars = construct_variables(data, n)
-    constraints = construct_constraints(row_vars, col_vars, n)
-    csp = CSP(row_vars, col_vars, constraints, n)
-
-    print('\n', len(csp.constraints), 'constraints and', len(csp.variables), 'variables')
-    print('domain sizes: ', [len(v.domain) for v in csp.unassigned_variables])
-
-    start_time = time.time()
-    result = recursive_backtracking(csp, random_heuristic)
-    total_time = time.time() - start_time
-
-    print('Solution\n'.format(result))
-    print('Total time: ', total_time)
-    # KEPT DEBUGGING EXAMPLE FOR FUTURE TESTING PURPOSES IF NEEDED
-
-    # Go through some timings
-    # TODO Implement node counting
-    boards = {
-        6: 'Data/6x6_very_hard.txt',
-        8: 'Data/8x8_example.txt',
-        10: 'Data/10x10_example.txt',
-        12: 'Data/12x12_example.txt',
-        14: 'Data/14x14_example.txt'
-    }
-
-    print('\n', '='*64)
-    board_path = boards[6]
-    heuristic = most_constrained_heuristic
-    print('Solving board at', board_path, 'with heuristic:', heuristic.__name__)
-    result, total_time = time_solve(board_path, heuristic)
-
-    print('\n', '='*64)
-    board_path = boards[8]
-    heuristic = most_constrained_heuristic
-    print('Solving board at', board_path, 'with heuristic:', heuristic.__name__)
-    result, total_time = time_solve(board_path, heuristic)
-
-    print('\n', '='*64)
-    board_path = boards[6]
-    heuristic = random_heuristic
-    print('Solving board at', board_path, 'with heuristic:', heuristic.__name__)
-    result, total_time = time_solve(board_path, heuristic)
-
-    print('\n', '='*64)
-    board_path = boards[8]
-    heuristic = random_heuristic
-    print('Solving board at', board_path, 'with heuristic:', heuristic.__name__)
-    result, total_time = time_solve(board_path, heuristic)
-
-
-# Iterate through all backtracking-heuristic combinations
-def solve():
-    file_name, separator = 'Data/binairo_samples.txt', "#End"
-    if os.path.isfile(file_name):
-        with open(file_name) as board_file:
-            data = []
-            for line in board_file.readlines():
-                data.append(line)
-                if separator in line:
-                    # Read in the board and compute it's dimensionality
-                    board, n = read_individual_board(data)
-                    data.clear()
-
-                    # Go through all the heuristics
-                    for heuristic in [random_heuristic, most_constrained_heuristic]:
-                        result, total_time = time_solve("", heuristic, board=board, n=n)
-    else:
-        print("File: {} not found".format(file_name))
-
-
 def main():
-    random.seed(1)
-    solve()
-    #debugging_example()
+
+    # TODO: Accept user input for puzzle path
+    file_name = 'Data/binairo_samples.txt'
+    num_repeat_solve = 3
+    print_solutions = False
+
+    heuristics = {'random': random_heuristic,
+                  'most_constrained': lambda x: most_constrained_node_heuristic(x, False),
+                  'most_constraining': lambda x: most_constraining_node_heuristic(x, False)}
+
+    seed = random.randint(0, 4190)
+    np.random.seed(seed)
+    random.seed(seed)
+    print('Experiment seed: {}\n'.format(seed))
+
+    all_boards = read_boards_from_file(file_name)
+
+    for board in all_boards:
+
+        csp = construct_csp(board)
+
+        for heuristic_name, heuristic in heuristics.items():
+            print('Solving {}x{} board with {} heuristic'.format(csp.n, csp.n, heuristic_name))
+
+            for solve_number in range(num_repeat_solve):
+                result, node_tracker = backtracking(deepcopy(csp), heuristic)
+                assert result.is_solution_board() or node_tracker.out_of_time()
+
+                if print_solutions:
+                    print('Solution:')
+                    print(result)
+
+                print(solve_number + 1, node_tracker)
+
+            print('-' * 50)
 
 
 if __name__ == "__main__":
