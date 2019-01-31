@@ -11,12 +11,13 @@ from DataUtility.ReadData import read_boards_from_file
 from AC3.AC3 import ac3
 
 
-def backtracking_with_forward_checking(csp, heuristic):
-    node_tracker = NodeTracker()
+def backtracking_with_forward_checking(board, csp, heuristic):
+    node_tracker = NodeTracker(board, verbose_display=True)
 
     csp = ac3(csp)
 
     result = recursive_forwardchecking(csp, heuristic, node_tracker)
+    node_tracker.solution_board = result
     node_tracker.end()
     return result, node_tracker
 
@@ -120,7 +121,7 @@ def main():
             print('Solving {}x{} board with {} heuristic'.format(csp.n, csp.n, heuristic_name))
 
             for solve_number in range(num_repeat_solve):
-                result, node_tracker = backtracking_with_forward_checking(deepcopy(csp), heuristic)
+                result, node_tracker = backtracking_with_forward_checking(board, deepcopy(csp), heuristic)
                 assert result.is_solution_board()or node_tracker.out_of_time()
 
                 if print_solutions:
@@ -134,4 +135,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    #scrape_and_solve_boards()
+    # scrape_and_solve_boards()
