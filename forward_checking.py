@@ -33,26 +33,28 @@ def recursive_forwardchecking(csp, heuristic, node_tracker):
             return -1
 
     heuristic_index = heuristic(csp)
-    previous_csp = deepcopy(csp)
 
     # For each available value x in Ai
     for val in list(csp.variables[heuristic_index].domain):
 
         # For each k in (1,2,...,n) -> Define A'k = Ak
+        copy_csp = deepcopy(csp)
+
         # A'i is committed to a value
-        csp.variables[heuristic_index].commit_value(val)
+        copy_csp.variables[heuristic_index].commit_value(val)
+
         node_tracker.increment()
 
-        csp = ac3(csp)
+        # Use the ac3 consistency algorithm to ensure all variables have
+        # arc-consistent domains
+        copy_csp = ac3(copy_csp)
 
         # We don't need to back track
-        if csp.is_valid_board():
+        if copy_csp.is_valid_board():
 
-            csp_result = recursive_forwardchecking(csp, heuristic, node_tracker)
-            if csp_result != -1:
-                return csp_result
-
-        csp = deepcopy(previous_csp)
+            copy_csp_result = recursive_forwardchecking(copy_csp, heuristic, node_tracker)
+            if copy_csp_result != -1:
+                return copy_csp_result
 
     return -1
 
