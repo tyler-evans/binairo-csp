@@ -39,6 +39,8 @@ def remove_inconsistent(x_i, x_j, constraint):
             x_i.domain.remove(i)
             removed = True
 
+    x_i.value = None
+
     return removed
 
 

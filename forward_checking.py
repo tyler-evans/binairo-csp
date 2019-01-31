@@ -11,7 +11,7 @@ from AC3.AC3 import ac3
 
 def recursive_forwardchecking(csp, heuristic):
     # Finished
-    if not csp.unassigned_variables:
+    if csp.is_solution_board() and not csp.unassigned_variables:
         return csp
 
     # Need to backtrack
@@ -29,8 +29,7 @@ def recursive_forwardchecking(csp, heuristic):
         # A'i is committed to a value
         csp.unassigned_variables[heuristic_index].set_value(val)
 
-        print([len(x.domain) for x in csp.variables])
-        print("UNASSIGNED VARS: {}".format(len(csp.unassigned_variables)))
+ 
 
         csp = ac3(csp)
 
