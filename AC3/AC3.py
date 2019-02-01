@@ -59,7 +59,7 @@ def ac3(csp):
         to_do_arcs.append((x_j, x_i))
 
     # Keep looping until we are guaranteed that we don't have any inconsistent arcs within our domain (to_do_arcs will
-    # empty)
+    # be empty)
     while to_do_arcs:
         x_i, x_j = to_do_arcs.pop()
         if remove_inconsistent(x_i, x_j, csp.get_arc(x_i, x_j)):

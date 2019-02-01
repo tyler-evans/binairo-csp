@@ -43,8 +43,8 @@ def recursive_forwardchecking(csp, heuristic, node_tracker):
         # A'i is committed to a value
         copy_csp.variables[heuristic_index].commit_value(val)
 
-        # TODO: Confirm with MC that everytime we commit a "node" to a value, that counts as another search node
-        # TODO: that we should keep track of
+        # TODO: Confirm with MC that everytime we commit a "node" to a value, even if it's the same node, that it counts
+        # TODO: as another node that we should keep track of for our "search nodes" counts
         node_tracker.increment()
 
         # Use the ac3 consistency algorithm to ensure all variables have
