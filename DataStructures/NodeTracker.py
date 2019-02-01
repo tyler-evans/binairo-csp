@@ -3,8 +3,7 @@ import time
 
 class NodeTracker:
 
-    def __init__(self, board, time_limit=60*60, verbose_display=False):
-        self.initial_board = board
+    def __init__(self, time_limit=60*60, verbose_display=False):
         self.solution_board = None
         self.verbose_display = verbose_display
         self.num_search_nodes = 0

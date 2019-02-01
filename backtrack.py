@@ -10,8 +10,9 @@ from DataStructures.NodeTracker import NodeTracker
 
 
 def backtracking(csp, heuristic):
-    node_tracker = NodeTracker()
+    node_tracker = NodeTracker(verbose_display=True)
     result = recursive_backtracking(csp, heuristic, node_tracker)
+    node_tracker.solution_board = result
     node_tracker.end()
     return result, node_tracker
 

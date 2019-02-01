@@ -11,8 +11,8 @@ from DataUtility.ReadData import read_boards_from_file
 from AC3.AC3 import ac3
 
 
-def backtracking_with_forward_checking(board, csp, heuristic):
-    node_tracker = NodeTracker(board, verbose_display=True)
+def backtracking_with_forward_checking(csp, heuristic):
+    node_tracker = NodeTracker(verbose_display=True)
 
     csp = ac3(csp)
 
@@ -43,6 +43,8 @@ def recursive_forwardchecking(csp, heuristic, node_tracker):
         # A'i is committed to a value
         copy_csp.variables[heuristic_index].commit_value(val)
 
+        # TODO: Confirm with MC that everytime we commit a "node" to a value, that counts as another search node
+        # TODO: that we should keep track of
         node_tracker.increment()
 
         # Use the ac3 consistency algorithm to ensure all variables have
@@ -123,7 +125,7 @@ def main():
             print('Solving {}x{} board with {} heuristic'.format(csp.n, csp.n, heuristic_name))
 
             for solve_number in range(num_repeat_solve):
-                result, node_tracker = backtracking_with_forward_checking(board, deepcopy(csp), heuristic)
+                result, node_tracker = backtracking_with_forward_checking(deepcopy(csp), heuristic)
                 assert result.is_solution_board()or node_tracker.out_of_time()
 
                 if print_solutions:
