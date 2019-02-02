@@ -43,6 +43,11 @@ class DataTracker:
             self.table.add_row(["", "", "", "", ""])
         print(self.table)
 
+    def table_to_file(self):
+        table_txt = self.table.get_string()
+        with open('last-run-metrics.txt', 'w') as file:
+            file.write(table_txt)
+
     def clear(self):
         self.run_times = []
         self.search_nodes = []
