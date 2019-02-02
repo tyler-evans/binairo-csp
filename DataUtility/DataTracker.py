@@ -42,6 +42,7 @@ class DataTracker:
             self.table.add_row(["", "Standard Deviation # Search Nodes", all_heuristics["random"]["stdnodes"], all_heuristics["most_constrained"]["stdnodes"], all_heuristics["most_constraining"]["stdnodes"]])
             self.table.add_row(["", "", "", "", ""])
         print(self.table)
+        self.table_to_file()
 
     def table_to_file(self):
         table_txt = self.table.get_string()
