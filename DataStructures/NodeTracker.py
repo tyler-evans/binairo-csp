@@ -3,7 +3,9 @@ import time
 
 class NodeTracker:
 
-    def __init__(self, time_limit=60*60):
+    def __init__(self, time_limit=60*5, verbose_display=False):
+        self.solution_board = None
+        self.verbose_display = verbose_display
         self.num_search_nodes = 0
         self.end_time = None
         self.did_not_finish = False
@@ -34,5 +36,7 @@ class NodeTracker:
         if self.did_not_finish:
             result += '\n\tTime: DNF after limit of {} seconds'.format(self.time_limit)
         else:
-            result += '\n\tTime: {:.5f} seconds'.format(self.get_elapsed_time())
+            result += '\n\tTime: {:.5f} seconds\n'.format(self.get_elapsed_time())
+        if self.verbose_display:
+            result += '\t' + '\t'.join(str(self.solution_board).splitlines(True)) + '\n'
         return result

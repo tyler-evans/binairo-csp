@@ -9,14 +9,16 @@ from ConstraintPropagation.ConstraintPropagation import AC_3
 from Scraper.Scraper import scrape_board
 from DataStructures.NodeTracker import NodeTracker
 from DataUtility.ReadData import read_boards_from_file
+from DataUtility.DataTracker import DataTracker
 
 
 def backtracking_with_forward_checking(csp, heuristic):
-    node_tracker = NodeTracker()
+    node_tracker = NodeTracker(verbose_display=True)
 
     csp = AC_3(csp)
 
     result = recursive_backtracking_with_forward_checking(csp, heuristic, node_tracker)
+    node_tracker.solution_board = result
     node_tracker.end()
     return result, node_tracker
 
@@ -102,17 +104,22 @@ def main():
     print('Experiment seed: {}\n'.format(seed))
 
     all_boards = read_boards_from_file(file_name)
+    data_tracker = DataTracker()
 
     for board in all_boards:
 
         csp = construct_csp(board)
 
         for heuristic_name, heuristic in heuristics.items():
+
+            data_tracker.clear()
             print('Solving {}x{} board with {} heuristic'.format(csp.n, csp.n, heuristic_name))
 
             for solve_number in range(num_repeat_solve):
                 result, node_tracker = backtracking_with_forward_checking(deepcopy(csp), heuristic)
                 assert result.is_solution_board()or node_tracker.out_of_time()
+                data_tracker.run_times.append(node_tracker.get_elapsed_time())
+                data_tracker.search_nodes.append(node_tracker.num_search_nodes)
 
                 if print_solutions:
                     print('Solution:')
@@ -120,7 +127,11 @@ def main():
 
                 print(solve_number + 1, node_tracker)
 
+            data_tracker.add_heuristic_record(heuristic_name, csp.n)
+            print(data_tracker)
             print('-'*50)
+
+    data_tracker.display_results()
 
 
 if __name__ == "__main__":

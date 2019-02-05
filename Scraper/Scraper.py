@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 # puzzle_no: [1, 2, 3, ..., ?]
 # size: [6, 8, 10, 12, 14]
 def scrape_board(difficulty, puzzle_no, n):
-    link = f'http://www.binarypuzzle.com/puzzles.php?size={n}&level={difficulty}&nr={puzzle_no}'
+    link = 'http://www.binarypuzzle.com/puzzles.php?size={}&level={}&nr={}'.format(n, difficulty, puzzle_no)
     page = urllib.request.urlopen(link)
     soup = BeautifulSoup(page, 'html.parser')
     cells = soup.findAll('div', attrs={'class': 'puzzlecel'})

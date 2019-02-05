@@ -15,11 +15,9 @@ def construct_csp(board):
     return csp
 
 
-# Filter out all unary constraints as follows:
 # Construct all permutations of "0's" and "1's" in a list of size n ->
-# such that the number of "0's" and "1's" in the list are both equivalent (n//2) ->
-# such that there are no 3 adjacent "0's" and "1's" in a row ->
-# these are all of the "valid" constraints for the binairo problem -> return them
+# find all possible permutations in which the number of "0's" and "1's" in the list are both equivalent (n//2) ->
+# find all possible permutations in which there are no 3 adjacent "0's" and "1's" in a row -> return
 def construct_valid_domain(n):
     domain = itertools.product([0,1], repeat=n)
     domain = itertools.filterfalse(lambda x: sum(x)!=n//2, domain)
@@ -59,20 +57,23 @@ def construct_variables(data, n):
 def construct_constraints(row_vars, col_vars, n):
     constraints = []
 
-    # Initialize the function with indices (i) + (j) representing row + column indices, then when the "truthiness" of
-    # of the Constraint class is called later on through "self.condition(v1,v2)" -> evaluate whether the values of
-    # the two are equal
+    # This is an additional constraint which is not inherently required in the Binairo puzzle, however it is necessary
+    # in order to ensure a row + column node representation of a CSP graph works. This function ensures that if any
+    # value is currently assigned to a row or a column which satisfies the constraints, that the assignment of another
+    # row or column value doesn't "overwrite" the value stored in the row or column it would be affecting  -> this
+    # function thereby ensures that all corresponding row and column value assignments "line up" with one another, such
+    # that row + column value assignments do not compete with each other and overwrite their own data
     def row_col_board_constraint(i, j):
         return lambda row_var, col_var: row_var.value is None or col_var.value is None or row_var.value[j] == col_var.value[i]
 
-    constraints += [Constraint(row_vars[i], col_vars[j], row_col_board_constraint(i,j), name=f'row_col_equal({i},{j})') for i in range(n) for j in range(n)]
+    constraints += [Constraint(row_vars[i], col_vars[j], row_col_board_constraint(i,j), name='row_col_equal({},{})'.format(i, j)) for i in range(n) for j in range(n)]
 
     # Ensure each row is unique from every other row
     condition = lambda v1, v2: v1.value is None or v2.value is None or v1.value != v2.value
-    constraints += [Constraint(row_vars[i], row_vars[j], condition, name=f'row_alldiff({i},{j})') for i in range(n) for j in range(i+1,n)]
+    constraints += [Constraint(row_vars[i], row_vars[j], condition, name='row_alldiff({},{})'.format(i, j)) for i in range(n) for j in range(i+1,n)]
 
     # Ensure each col is unique from every other col
-    constraints += [Constraint(col_vars[i], col_vars[j], condition, name=f'col_alldiff({i},{j})') for i in range(n) for j in range(i+1,n)]
+    constraints += [Constraint(col_vars[i], col_vars[j], condition, name='col_alldiff({},{})'.format(i, j)) for i in range(n) for j in range(i+1,n)]
 
     return constraints
 
