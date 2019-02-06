@@ -80,6 +80,7 @@ General Algorithm Analysis:
 
 Algorithm Results Comparison:
     - FC x574 faster than BT on the 8x8 puzzle, both utilizing "Random"
+    - FC had .000003 the search node space in comparison to BT on the 8x8 puzzle, both utilizing "Random"
 
     - FC x4 faster than BT on the 8x8 puzzle, both utilizing "Most Constrained"
     - FC had .007 the search node space in comparison to BT on the 8x8 puzzle, both utilizing "Most Constrained"
