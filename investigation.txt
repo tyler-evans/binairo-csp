@@ -56,3 +56,41 @@
 |        |  Standard Deviation # Search Nodes   |         0.0          |          0.0           |          0.0          |
 |        |                                      |                      |                        |                       |
 +--------+--------------------------------------+----------------------+------------------------+-----------------------+
+
+================
+RESULTS SUMMARY:
+================
+
+Heuristic Metric Analysis:
+- The best heuristic for our representation of the CSP problem was the "Most Constrained" heuristic. Due to a row + column based representation of this CSP problem: Nodes in our representation have
+  inherently more domain possibilities than a single cell representation. This means being able to instantiate a Node with it's "correct" value early on in the problem is key for the forward-checking
+  /w constraint propagation algorithm, which causes neighbours to cut out domain items that are guaranteed to not be in the final solution. As for "Random" and "Most Constraining" heuristics, they seem
+  to be more unpredictable in comparison to how they perform, relative to one another. This is because "Random" could introduce behaviour similar to the "Most Constrained" heuristic seemingly by chance, and
+  the "Most Constraining" heuristic will always select the Node which, if instantiated with it's correct value, can have the greatest domain reduction of all neighbouring nodes in the graph, thereby generating
+  the most rewarding node instantiation within the CSP.
+
+General Algorithm Analysis:
+- On average, the forward-checking w/ constraint propagation (FORWARD_CHECKING.PY) algorithm outperformed the backtracking (BACKTRACK.PY) algorithm by a large margin. Forward-checking w/ constraint
+  propagation's metrics (average runtime + search nodes) became increasingly better in comparison to backtracking's metrics as puzzle dimensions grew. Backtracking's search nodes on average are much higher,
+  which is intuitive because the algorithm is not "smart" and doesn't utilize instantiation information as well as forward-checking w/ constraint propagation to reduce neighbouring node's domains, thus
+  creating a need for more search. Additionally, this causes the average run times for backtracking to increase much faster with higher puzzle dimensions, leading to longer runtimes, as can be seen in the tables
+  where "-1" represents an inability to find a solution within the maximum 5 minute time frame in all 3 puzzle attempts. By making smarter decisions and reducing domains that were guaranteed to not be possible
+  given instantiated values, forward-checking w/ constraint propagation maintained a consistent number of search nodes (on average x2 the puzzle dimensions) and extremely fast run times (t < 2 seconds on 14x14's
+  and smaller puzzle dimensions, and t < 11 seconds on 20x20 utilizing the "most_constrained" heuristic)
+
+Algorithm Results Comparison:
+    - FC x574 faster than BT on the 8x8 puzzle, both utilizing "Random"
+
+    - FC x4 faster than BT on the 8x8 puzzle, both utilizing "Most Constrained"
+    - FC had .007 the search node space in comparison to BT on the 8x8 puzzle, both utilizing "Most Constrained"
+
+    - FC x13 faster than BT on the 10x10 puzzle, both utilizing "Most Constrained"
+    - FC had .002 the search node space in comparison to BT on the 10x10 puzzle, both utilizing "Most Constrained"
+
+    - FC x134 faster than BT on the 12x12 puzzle, both utilizing "Most Constrained"
+    - FC had .0001 the search node space in comparison to BT on the 12x12 puzzle, both utilizing "Most Constrained"
+
+    - As puzzle dimensions grew > 12x12, BT became unable to finish any of the puzzles in a 5 minute time frame utilizing any heuristic,
+      thus making FC exceedingly better than BT overall.
+
+
