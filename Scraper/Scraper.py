@@ -1,7 +1,10 @@
 import urllib.request
 import numpy as np
 
-from bs4 import BeautifulSoup
+try:
+    from bs4 import BeautifulSoup
+except:
+    pass
 
 
 # difficulty: [1,2,3,4] [easy, med, hard, vhard]
