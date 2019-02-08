@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import argparse
 
 from copy import deepcopy
 
@@ -52,7 +53,7 @@ def recursive_backtracking_with_forward_checking(csp, heuristic, node_tracker):
 def scrape_and_solve_boards():
 
     ##########################################################################
-    # For POC, scrape some vhard 14x14 puzzles, apply dropout (to make harder)
+    # For debugging and POC, scrape some vhard 14x14 puzzles, apply dropout (to make harder)
     # and solve using constraint prop (no heuristic)
     ##########################################################################
 
@@ -81,29 +82,33 @@ def scrape_and_solve_boards():
 
         csp, node_tracker = backtracking_with_forward_checking(csp, heuristics['random'])
         assert csp.is_solution_board() or node_tracker.out_of_time()
-        #print(csp)
 
         print(node_tracker)
 
 
 def main():
 
-    # TODO: Accept user input for puzzle path
+    parser = argparse.ArgumentParser(description='Solve binairo puzzles')
+    parser.add_argument('--file', type=str, help='Path to input file')
+    parser.add_argument('--num_runs', type=int, help='Number of solves for each puzzle/heuristic combination', default=1)
+    args = parser.parse_args()
 
-    file_name = 'Data/binairo_evaluation.txt'
-    num_repeat_solve = 3
-    print_solutions = False
+    if args.file is None:
+        file = 'Data/binairo_evaluation.txt'
+        print('No file provided, defaulting to file at: ', file)
 
-    heuristics = {'random': random_heuristic,
-                  'most_constrained': lambda x: most_constrained_node_heuristic(x, True),
-                  'most_constraining': lambda x: most_constraining_node_heuristic(x, True)}
+    print('Solving', args.num_runs, 'runs for each puzzle/heuristic combination')
+
+    heuristics = {'most_constrained': lambda x: most_constrained_node_heuristic(x, True),
+                  'most_constraining': lambda x: most_constraining_node_heuristic(x, True),
+                  'random': random_heuristic}
 
     seed = random.randint(0, 4190)
     np.random.seed(seed)
     random.seed(seed)
     print('Experiment seed: {}\n'.format(seed))
 
-    all_boards = read_boards_from_file(file_name)
+    all_boards = read_boards_from_file(file)
     data_tracker = DataTracker()
 
     for board in all_boards:
@@ -115,15 +120,11 @@ def main():
             data_tracker.clear()
             print('Solving {}x{} board with {} heuristic'.format(csp.n, csp.n, heuristic_name))
 
-            for solve_number in range(num_repeat_solve):
+            for solve_number in range(args.num_runs):
                 result, node_tracker = backtracking_with_forward_checking(deepcopy(csp), heuristic)
                 assert result.is_solution_board()or node_tracker.out_of_time()
                 data_tracker.run_times.append(node_tracker.get_elapsed_time())
                 data_tracker.search_nodes.append(node_tracker.num_search_nodes)
-
-                if print_solutions:
-                    print('Solution:')
-                    print(result)
 
                 print(solve_number + 1, node_tracker)
 
@@ -136,4 +137,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    #scrape_and_solve_boards()
