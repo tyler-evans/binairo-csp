@@ -53,6 +53,8 @@ def main():
     if args.file is None:
         file = 'Data/binairo_evaluation.txt'
         print('No file provided, defaulting to file at: ', file)
+    else:
+        file = args.file
 
     print('Solving', args.num_runs, 'runs for each puzzle/heuristic combination')
 
